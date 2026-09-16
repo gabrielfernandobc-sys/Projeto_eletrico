@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimensionamento Elétrico NBR 5410 & Lista de Materiais</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen">
+    <div id="app" class="max-w-7xl mx-auto px-4 py-6">
+        
+        <!-- CABEÇALHO DA APLICAÇÃO -->
+        <header class="bg-slate-900 text-white rounded-xl p-6 shadow-lg mb-8 flex flex-col md:flex-row justify-between items-center no-print">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-2xl font-bold flex items-center gap-3">
+                    <i class="fa-solid fa-bolt text-amber-400 text-3xl"></i>
+                    Dimensionamento Elétrico NBR 5410
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Levantamento Automático de Cargas, Sizing de Condutores & Quantitativo de Materiais</p>
+            </div>
+            <div class="flex gap-3">
+                <button @click="carregarExemplo" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-700 transition">
+                    <i class="fa-solid fa-folder-open text-amber-400"></i> Carregar Exemplo
+                </button>
+                <button @click="imprimirRelatorio" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-4 py-2 rounded-lg transition flex items-center gap-2 text-sm shadow">
+                    <i class="fa-solid fa-file-pdf"></i> Exportar / Imprimir Relatório
+                </button>
+            </div>
+        </header>
+
+        <!-- MENU DE NAVEGAÇÃO -->
+        <div class="flex border-b border-slate-300 mb-6 space-x-2 md:space-x-4 no-print overflow-x-auto">
+            <button @click="abaAtiva = 'cargas'" :class="abaAtiva === 'cargas' ? 'border-amber-500 text-amber-600 font-bold bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'" class="py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-house-laptop"></i> 1. Levantamento de Cargas (Cômodos)
+            </button>
+            <button @click="abaAtiva = 'quadro'" :class="abaAtiva === 'quadro' ? 'border-amber-500 text-amber-600 font-bold bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'" class="py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-sliders"></i> 2. Circuitos & Condutores NBR 5410
+            </button>
+            <button @click="abaAtiva = 'materiais'" :class="abaAtiva === 'materiais' ? 'border-amber-500 text-amber-600 font-bold bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'" class="py-3 px-4 border-b-2 font-medium text-sm rounded-t-lg transition flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-boxes-stacked"></i> 3. Quantidade de Materiais (BOM)
+            </button>
+        </div>
+
+        <!-- ABA 1: LEVANTAMENTO DE CARGAS POR CÔMODO -->
+        <div v-show="abaAtiva === 'cargas'" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- FORMULÁRIO DE CADASTRO -->
+                <div class="bg-white p-6 rounded-xl shadow border border-slate-200 col-span-1">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-amber-500"></i> Adicionar Cômodo
+                    </h2>
+                    <form @submit.prevent="adicionarComodo" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nome do Cômodo</label>
+                            <input v-model="novoComodo.nome" type="text" placeholder="Ex: Quarto 1, Cozinha, Sala" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Ambiente (NBR 5410)</label>
+                            <select v-model="novoComodo.tipo" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="geral">Geral (Quarto, Sala, Corredor, Hall)</option>
+                                <option value="servico">Serviço / Água (Cozinha, Copa, A. Serviço, Banheiro)</option>
+                                <option value="externo">Externo / Varanda / Garagem</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Área (m²)</label>
+                                <input v-model.number="novoComodo.area" type="number" step="0.1" min="0.5" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Perímetro (m)</label>
+                                <input v-model.number="novoComodo.perimetro" type="number" step="0.1" min="1" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                            </div>
+                        </div>
+
+                        <!-- CARGA TUE -->
+                        <div class="pt-3 border-t border-slate-200">
+                            <label class="block text-xs font-bold text-blue-700 uppercase mb-1">Carga Específica TUE (Opcional)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input v-model="novoComodo.tueNome" type="text" placeholder="Equipamento (Ex: Chuveiro)" class="border border-slate-300 rounded-lg p-2 text-xs">
+                                <input v-model.number="novoComodo.tuePotencia" type="number" placeholder="Potência (W)" class="border border-slate-300 rounded-lg p-2 text-xs">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg text-sm transition flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> Calcular Cargas & Inserir
+                        </button>
+                    </form>
+                </div>
+
+                <!-- LISTA DE CÔMODOS -->
+                <div class="bg-white p-6 rounded-xl shadow border border-slate-200 col-span-2">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center justify-between">
+                        <span><i class="fa-solid fa-table-list text-amber-500"></i> Cargas Calculadas por Cômodo</span>
+                        <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-mono">{{ comodos.length }} ambiente(s)</span>
+                    </h2>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-semibold border-b">
+                                    <th class="p-2.5">Cômodo</th>
+                                    <th class="p-2.5">Área / Perím.</th>
+                                    <th class="p-2.5">Ilum. (VA)</th>
+                                    <th class="p-2.5">TUGs (Qtd / VA)</th>
+                                    <th class="p-2.5">TUEs (W)</th>
+                                    <th class="p-2.5 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200">
+                                <tr v-for="(item, idx) in comodos" :key="idx" class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-bold text-slate-800">{{ item.nome }} <span class="block text-[10px] text-slate-400 capitalize">{{ item.tipo }}</span></td>
+                                    <td class="p-2.5">{{ item.area }} m² / {{ item.perimetro }} m</td>
+                                    <td class="p-2.5 font-mono text-amber-600 font-bold">{{ item.iluminacaoVA }} VA</td>
+                                    <td class="p-2.5 font-mono">{{ item.qtdTug }}x ({{ item.tugTotalVA }} VA)</td>
+                                    <td class="p-2.5">
+                                        <span v-if="item.tuePotencia > 0" class="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">
+                                            {{ item.tueNome }}: {{ item.tuePotencia }}W
+                                        </span>
+                                        <span v-else class="text-slate-400">-</span>
+                                    </td>
+                                    <td class="p-2.5 text-center">
+                                        <button @click="removerComodo(idx)" class="text-red-500 hover:text-red-700 p-1">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr v-if="comodos.length === 0">
+                                    <td colspan="6" class="p-8 text-center text-slate-400 italic">
+                                        Nenhum cômodo cadastrado ainda. Preencha o formulário ou clique em "Carregar Exemplo".
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TOTALIZADOR DAS CARGAS -->
+                    <div v-if="comodos.length > 0" class="mt-6 p-4 bg-slate-900 text-white rounded-xl grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <span class="block text-xs text-slate-400">Total Iluminação</span>
+                            <span class="text-lg font-bold text-amber-400 font-mono">{{ totalIluminacaoVA }} VA</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-slate-400">Total TUGs</span>
+                            <span class="text-lg font-bold text-emerald-400 font-mono">{{ totalTugVA }} VA</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-slate-400">Total TUEs</span>
+                            <span class="text-lg font-bold text-blue-400 font-mono">{{ totalTueW }} W</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: QUADRO DE DISTRIBUIÇÃO E DIMENSIONAMENTO NBR 5410 -->
+        <div v-show="abaAtiva === 'quadro'" class="space-y-6">
+            <!-- PARÂMETROS DA REDE -->
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tensão Fase-Neutro</label>
+                    <select v-model.number="config.tensaoFN" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-bold text-slate-800">
+                        <option :value="127">127 V (Monofásico / Bifásico)</option>
+                        <option :value="220">220 V (Monofásico / Bifásico)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Temperatura Ambiente</label>
+                    <select v-model.number="config.tempAmbiente" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                        <option :value="30">30 °C (Fator fT = 1,00)</option>
+                        <option :value="35">35 °C (Fator fT = 0,94)</option>
+                        <option :value="40">40 °C (Fator fT = 0,87)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Agrupamento Eletroduto</label>
+                    <select v-model.number="config.qtdAgrupamento" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                        <option :value="1">1 circuito (fG = 1,00)</option>
+                        <option :value="2">2 circuitos (fG = 0,80)</option>
+                        <option :value="3">3 circuitos (fG = 0,70)</option>
+                        <option :value="4">4 circuitos (fG = 0,65)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Queda Tensão Admissível</label>
+                    <select v-model.number="config.quedaMaxPermitida" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                        <option :value="4">4,0% (Pontos de Utilização)</option>
+                        <option :value="2">2,0% (Alimentador Principal)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- DIMENSIONAMENTO DOS CIRCUITOS -->
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center justify-between">
+                    <span><i class="fa-solid fa-microchip text-amber-500"></i> Quadro de Cargas & Dimensionamento dos Circuitos</span>
+                    <span class="text-xs text-slate-500 font-mono">Método de Instalação B1 (Eletroduto embutido)</span>
+                </h2>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-900 text-white font-semibold">
+                                <th class="p-2.5">Circ. Nº</th>
+                                <th class="p-2.5">Descrição do Circuito</th>
+                                <th class="p-2.5">Tipo</th>
+                                <th class="p-2.5">Tensão</th>
+                                <th class="p-2.5">Potência</th>
+                                <th class="p-2.5">Corrente $I_B$</th>
+                                <th class="p-2.5">Corrente Corrigida $I_B'$</th>
+                                <th class="p-2.5">Bitola Cabo Fase/Neutro</th>
+                                <th class="p-2.5">Bitola Terra</th>
+                                <th class="p-2.5">Disjuntor Termomagnético ($I_n$)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr v-for="c in circuitosCalculados" :key="c.numero" class="hover:bg-amber-50/50">
+                                <td class="p-2.5 font-bold text-center bg-slate-100">{{ c.numero }}</td>
+                                <td class="p-2.5 font-semibold text-slate-900">{{ c.nome }}</td>
+                                <td class="p-2.5">
+                                    <span :class="c.tipo === 'Iluminação' ? 'bg-amber-100 text-amber-800' : (c.tipo === 'TUG' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800')" class="px-2 py-0.5 rounded font-bold text-[10px]">
+                                        {{ c.tipo }}
+                                    </span>
+                                </td>
+                                <td class="p-2.5">{{ c.tensao }} V</td>
+                                <td class="p-2.5 font-mono">{{ c.potencia }} {{ c.tipo === 'TUE' ? 'W' : 'VA' }}</td>
+                                <td class="p-2.5 font-mono font-semibold text-slate-700">{{ c.ib.toFixed(2) }} A</td>
+                                <td class="p-2.5 font-mono font-bold text-amber-600">{{ c.ibCorrigida.toFixed(2) }} A</td>
+                                <td class="p-2.5 font-bold font-mono text-emerald-700 bg-emerald-50 rounded border border-emerald-200">{{ c.secaoFase }} mm²</td>
+                                <td class="p-2.5 font-mono text-slate-600">{{ c.secaoTerra }} mm²</td>
+                                <td class="p-2.5 font-bold font-mono text-blue-700 bg-blue-50 rounded border border-blue-200">{{ c.disjuntor }} A (Curva C)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 3: QUANTIDADE DE MATERIAIS -->
+        <div v-show="abaAtiva === 'materiais'" class="space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked text-amber-500"></i> Quantitativo de Materiais (Bill of Materials)
+                </h2>
+                <p class="text-slate-500 text-xs mb-6">Lista completa de insumos com margem técnica de sobra (15%) para compra e execução.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- CABOS E CONDUTORES -->
+                    <div class="border border-slate-200 rounded-xl p-5 bg-slate-50">
+                        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-scroll text-blue-600"></i> Condutores Flexíveis 750V (Cobre PVC)
+                        </h3>
+                        <ul class="space-y-2 text-xs">
+                            <li v-for="(m, bitola) in listaMateriais.cabos" :key="bitola" class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <span>Cabo Flexível 750V <strong>{{ bitola }} mm²</strong></span>
+                                <span class="font-mono font-bold text-blue-600 text-sm">{{ m }} metros</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- QUADRO E PROTEÇÃO -->
+                    <div class="border border-slate-200 rounded-xl p-5 bg-slate-50">
+                        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-amber-500"></i> Quadro de Distribuição & Proteção
+                        </h3>
+                        <ul class="space-y-2 text-xs">
+                            <li class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <span>Quadro de Distribuição de Embutir (QDT)</span>
+                                <span class="font-mono font-bold text-amber-600 text-sm">{{ listaMateriais.qdtModulos }} Módulos DIN</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <span>Disjuntor Geral Bipolar</span>
+                                <span class="font-mono font-bold text-amber-600 text-sm">1x {{ listaMateriais.disjuntorGeral }}A</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <span>Interruptor Diferencial Residual (IDR Geral 30mA)</span>
+                                <span class="font-mono font-bold text-amber-600 text-sm">1x {{ listaMateriais.idrGeral }}A / 30mA</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                                <span>DPS Classe II 275V (Proteção Surto)</span>
+                                <span class="font-mono font-bold text-amber-600 text-sm">2 unidades</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- DISPOSITIVOS DE MANOBRA E TUBULAÇÃO -->
+                    <div class="border border-slate-200 rounded-xl p-5 bg-slate-50 md:col-span-2">
+                        <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-plug text-emerald-600"></i> Tomadas, Interruptores, Caixas & Eletrodutos
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="block text-slate-500 mb-1">Tomadas TUG 10A</span>
+                                <span class="text-lg font-bold font-mono text-slate-800">{{ listaMateriais.tug10A }} unid.</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="block text-slate-500 mb-1">Tomadas TUE 20A</span>
+                                <span class="text-lg font-bold font-mono text-slate-800">{{ listaMateriais.tue20A }} unid.</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="block text-slate-500 mb-1">Interruptores</span>
+                                <span class="text-lg font-bold font-mono text-slate-800">{{ listaMateriais.interruptores }} unid.</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="block text-slate-500 mb-1">Eletroduto 3/4"</span>
+                                <span class="text-lg font-bold font-mono text-slate-800">{{ listaMateriais.eletroduto34 }} m</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="block text-slate-500 mb-1">Caixas 4x2"</span>
+                                <span class="text-lg font-bold font-mono text-slate-800">{{ listaMateriais.caixas4x2 }} unid.</span>
+                            </div>
+                            <div class="bg-white p-3.5 rounded-lg border border-slate-200 shadow-sm">
+                                <span class="block text-slate-500 mb-1">Caixas Teto (Octogonais)</span>
+                                <span class="text-lg font-bold font-mono text-slate-800">{{ comodos.length }} unid.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT REATIVO VUE 3 -->
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    abaAtiva: 'cargas',
+                    config: {
+                        tensaoFN: 127,
+                        tempAmbiente: 30,
+                        qtdAgrupamento: 2,
+                        quedaMaxPermitida: 4
+                    },
+                    novoComodo: {
+                        nome: '',
+                        tipo: 'geral',
+                        area: null,
+                        perimetro: null,
+                        tueNome: '',
+                        tuePotencia: null
+                    },
+                    comodos: []
+                }
+            },
+            computed: {
+                totalIluminacaoVA() {
+                    return this.comodos.reduce((acc, c) => acc + c.iluminacaoVA, 0);
+                },
+                totalTugVA() {
+                    return this.comodos.reduce((acc, c) => acc + c.tugTotalVA, 0);
+                },
+                totalTueW() {
+                    return this.comodos.reduce((acc, c) => acc + (c.tuePotencia || 0), 0);
+                },
+                fatorTemp() {
+                    if (this.config.tempAmbiente === 35) return 0.94;
+                    if (this.config.tempAmbiente === 40) return 0.87;
+                    return 1.00;
+                },
+                fatorAgrupamento() {
+                    if (this.config.qtdAgrupamento === 2) return 0.80;
+                    if (this.config.qtdAgrupamento === 3) return 0.70;
+                    if (this.config.qtdAgrupamento === 4) return 0.65;
+                    return 1.00;
+                },
+                circuitosCalculados() {
+                    const lista = [];
+                    let num = 1;
+
+                    // Iluminação
+                    const potIlum = this.totalIluminacaoVA;
+                    if (potIlum > 0) {
+                        const ib = potIlum / this.config.tensaoFN;
+                        const ibCorr = ib / (this.fatorTemp * this.fatorAgrupamento);
+                        const secao = this.dimensionarCabo(ibCorr, 1.5);
+                        const disj = this.dimensionarDisjuntor(ibCorr, secao.iz);
+                        lista.push({
+                            numero: num++,
+                            nome: 'Iluminação Social e Serviços',
+                            tipo: 'Iluminação',
+                            tensao: this.config.tensaoFN,
+                            potencia: potIlum,
+                            ib: ib,
+                            ibCorrigida: ibCorr,
+                            secaoFase: secao.bitola,
+                            secaoTerra: secao.bitola,
+                            disjuntor: disj
+                        });
+                    }
+
+                    // TUGs Serviço
+                    const comodosServico = this.comodos.filter(c => c.tipo === 'servico');
+                    const potTugServico = comodosServico.reduce((acc, c) => acc + c.tugTotalVA, 0);
+                    if (potTugServico > 0) {
+                        const ib = potTugServico / this.config.tensaoFN;
+                        const ibCorr = ib / (this.fatorTemp * this.fatorAgrupamento);
+                        const secao = this.dimensionarCabo(ibCorr, 2.5);
+                        const disj = this.dimensionarDisjuntor(ibCorr, secao.iz);
+                        lista.push({
+                            numero: num++,
+                            nome: 'TUGs Cozinha e Área de Serviço',
+                            tipo: 'TUG',
+                            tensao: this.config.tensaoFN,
+                            potencia: potTugServico,
+                            ib: ib,
+                            ibCorrigida: ibCorr,
+                            secaoFase: secao.bitola,
+                            secaoTerra: secao.bitola,
+                            disjuntor: disj
+                        });
+                    }
+
+                    // TUGs Gerais
+                    const comodosGerais = this.comodos.filter(c => c.tipo !== 'servico');
+                    const potTugGeral = comodosGerais.reduce((acc, c) => acc + c.tugTotalVA, 0);
+                    if (potTugGeral > 0) {
+                        const ib = potTugGeral / this.config.tensaoFN;
+                        const ibCorr = ib / (this.fatorTemp * this.fatorAgrupamento);
+                        const secao = this.dimensionarCabo(ibCorr, 2.5);
+                        const disj = this.dimensionarDisjuntor(ibCorr, secao.iz);
+                        lista.push({
+                            numero: num++,
+                            nome: 'TUGs Salas e Dormitórios',
+                            tipo: 'TUG',
+                            tensao: this.config.tensaoFN,
+                            potencia: potTugGeral,
+                            ib: ib,
+                            ibCorrigida: ibCorr,
+                            secaoFase: secao.bitola,
+                            secaoTerra: secao.bitola,
+                            disjuntor: disj
+                        });
+                    }
+
+                    // TUEs
+                    this.comodos.forEach(c => {
+                        if (c.tuePotencia > 0) {
+                            const tensaoTue = c.tuePotencia > 3000 ? (this.config.tensaoFN === 127 ? 220 : this.config.tensaoFN) : this.config.tensaoFN;
+                            const ib = c.tuePotencia / tensaoTue;
+                            const ibCorr = ib / (this.fatorTemp * 1.00);
+                            const secao = this.dimensionarCabo(ibCorr, 2.5);
+                            const disj = this.dimensionarDisjuntor(ibCorr, secao.iz);
+                            lista.push({
+                                numero: num++,
+                                nome: `TUE - ${c.tueNome} (${c.nome})`,
+                                tipo: 'TUE',
+                                tensao: tensaoTue,
+                                potencia: c.tuePotencia,
+                                ib: ib,
+                                ibCorrigida: ibCorr,
+                                secaoFase: secao.bitola,
+                                secaoTerra: secao.bitola,
+                                disjuntor: disj
+                            });
+                        }
+                    });
+
+                    return lista;
+                },
+                listaMateriais() {
+                    const cabos = { '1.5': 0, '2.5': 0, '4.0': 0, '6.0': 0, '10.0': 0 };
+
+                    this.circuitosCalculados.forEach(c => {
+                        const metragem = 40;
+                        cabos[c.secaoFase] = (cabos[c.secaoFase] || 0) + (metragem * 3);
+                    });
+
+                    const qtdTugTotal = this.comodos.reduce((acc, c) => acc + c.qtdTug, 0);
+                    const qtdTueTotal = this.comodos.filter(c => c.tuePotencia > 0).length;
+
+                    const potTotalVA = (this.totalIluminacaoVA + this.totalTugVA) * 0.5 + (this.totalTueW * 0.8);
+                    const correnteGeral = potTotalVA / 220;
+                    const disjuntorGeralVal = correnteGeral > 50 ? 63 : (correnteGeral > 40 ? 50 : 40);
+
+                    return {
+                        cabos: cabos,
+                        disjuntorGeral: disjuntorGeralVal,
+                        idrGeral: disjuntorGeralVal,
+                        qdtModulos: Math.max(12, this.circuitosCalculados.length + 6),
+                        tug10A: qtdTugTotal,
+                        tue20A: qtdTueTotal,
+                        interruptores: Math.ceil(this.comodos.length * 1.2),
+                        eletroduto34: Math.ceil(this.comodos.length * 16),
+                        caixas4x2: qtdTugTotal + Math.ceil(this.comodos.length * 1.2)
+                    };
+                }
+            },
+            methods: {
+                calcularCargasNBR(c) {
+                    let ilumVA = 100;
+                    if (c.area >= 6) {
+                        const dif = c.area - 6;
+                        ilumVA += Math.floor(dif / 4) * 60;
+                    }
+
+                    let qtdTug = 1;
+                    let tugVA = 100;
+
+                    if (c.tipo === 'servico') {
+                        qtdTug = Math.max(1, Math.ceil(c.perimetro / 3.5));
+                        tugVA = qtdTug <= 3 ? (qtdTug * 600) : (3 * 600 + (qtdTug - 3) * 100);
+                    } else {
+                        if (c.area >= 6) qtdTug = Math.max(1, Math.ceil(c.perimetro / 5.0));
+                        tugVA = qtdTug * 100;
+                    }
+
+                    return { ilumVA, qtdTug, tugVA };
+                },
+                adicionarComodo() {
+                    const res = this.calcularCargasNBR(this.novoComodo);
+                    this.comodos.push({
+                        nome: this.novoComodo.nome,
+                        tipo: this.novoComodo.tipo,
+                        area: this.novoComodo.area,
+                        perimetro: this.novoComodo.perimetro,
+                        iluminacaoVA: res.ilumVA,
+                        qtdTug: res.qtdTug,
+                        tugTotalVA: res.tugVA,
+                        tueNome: this.novoComodo.tueNome || '',
+                        tuePotencia: this.novoComodo.tuePotencia || 0
+                    });
+
+                    this.novoComodo.nome = '';
+                    this.novoComodo.area = null;
+                    this.novoComodo.perimetro = null;
+                    this.novoComodo.tueNome = '';
+                    this.novoComodo.tuePotencia = null;
+                },
+                carregarExemplo() {
+                    this.comodos = [
+                        { nome: 'Sala de Estar', tipo: 'geral', area: 18, perimetro: 18, iluminacaoVA: 280, qtdTug: 4, tugTotalVA: 400, tueNome: 'Ar Condicionado', tuePotencia: 1400 },
+                        { nome: 'Cozinha', tipo: 'servico', area: 12, perimetro: 14, iluminacaoVA: 160, qtdTug: 4, tugTotalVA: 1900, tueNome: 'Torneira Elétrica', tuePotencia: 4500 },
+                        { nome: 'Banheiro Social', tipo: 'servico', area: 4.5, perimetro: 9, iluminacaoVA: 100, qtdTug: 1, tugTotalVA: 600, tueNome: 'Chuveiro Elétrico', tuePotencia: 6800 },
+                        { nome: 'Dormitório 1', tipo: 'geral', area: 12, perimetro: 14, iluminacaoVA: 160, qtdTug: 3, tugTotalVA: 300, tueNome: '', tuePotencia: 0 }
+                    ];
+                },
+                removerComodo(index) {
+                    this.comodos.splice(index, 1);
+                },
+                dimensionarCabo(ibCorr, minBitola) {
+                    const tabelaB1 = [
+                        { bitola: 1.5, iz: 17.5 },
+                        { bitola: 2.5, iz: 24.0 },
+                        { bitola: 4.0, iz: 32.0 },
+                        { bitola: 6.0, iz: 41.0 },
+                        { bitola: 10.0, iz: 57.0 }
+                    ];
+
+                    for (let c of tabelaB1) {
+                        if (c.bitola >= minBitola && c.iz >= ibCorr) return c;
+                    }
+                    return { bitola: 10.0, iz: 57.0 };
+                },
+                dimensionarDisjuntor(ibCorr, iz) {
+                    const disjPadrao = [10, 16, 20, 25, 32, 40, 50, 63];
+                    for (let d of disjPadrao) {
+                        if (d >= ibCorr && d <= iz) return d;
+                    }
+                    return 50;
+                },
+                imprimirRelatorio() {
+                    window.print();
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
