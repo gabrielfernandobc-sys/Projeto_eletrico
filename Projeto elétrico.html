@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PRO-ELÉTRICA CAD NBR 5410</title>
+    <!-- PWA Manifest & App Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ProElétrica">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -20,18 +31,220 @@
         @media print {
             .no-print { display: none !important; }
             .print-only { display: block !important; }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .tab-content { display: none !important; }
+            #containerPranchasImpressaoCompleta { display: block !important; }
+            .folha-prancha-abnt {
+                page-break-after: always !important;
+                break-after: page !important;
+                width: 100% !important;
+                min-height: 200mm !important;
+                box-sizing: border-box !important;
+                border: 2px solid #0f172a !important;
+                padding: 8mm !important;
+                margin-bottom: 20mm !important;
+                background: #ffffff !important;
+                color: #0f172a !important;
+            }
+        }
+        .folha-prancha-abnt {
+            background: #ffffff;
+            color: #0f172a;
+            border: 2px solid #334155;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+        .carimbo-tecnico {
+            border: 1.5px solid #0f172a;
+            background: #f8fafc;
         }
         .din-rail-bg {
             background: linear-gradient(180deg, #1e293b 0%, #334155 35%, #475569 50%, #334155 65%, #1e293b 100%);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
         }
+
+        /* OTIMIZAÇÕES MOBILE & TABLET (TOUCH & RESPONSIVIDADE) */
+        @media (max-width: 1023px) {
+            body {
+                overflow-x: hidden;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .mobile-bottom-nav {
+                display: flex !important;
+            }
+            .desktop-only-header {
+                display: none !important;
+            }
+            .desktop-only-subbar {
+                display: none !important;
+            }
+            .desktop-only-tabs {
+                display: none !important;
+            }
+            .mobile-top-header {
+                display: flex !important;
+            }
+            .canvas-container-responsive {
+                height: 400px !important;
+            }
+            canvas {
+                touch-action: none;
+            }
+        }
+        @media (min-width: 1024px) {
+            .mobile-bottom-nav {
+                display: none !important;
+            }
+            .mobile-top-header {
+                display: none !important;
+            }
+            .mobile-fab {
+                display: none !important;
+            }
+        }
+
+        /* Botão Flutuante (FAB) Mobile */
+        .mobile-fab-btn {
+            box-shadow: 0 8px 24px -2px rgba(245, 158, 11, 0.45);
+        }
+        /* Drawer Sheet */
+        .mobile-drawer-sheet {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen">
-    <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-4 pt-2 pb-24 lg:py-6">
         
-        <!-- CABEÇALHO -->
-        <header class="bg-slate-900 border border-slate-800 text-white rounded-2xl p-6 shadow-2xl mb-6 flex flex-col md:flex-row justify-between items-center no-print">
+        <!-- MOBILE TOP HEADER (VISÍVEL APENAS EM CELULARES E TABLETS) -->
+        <div class="mobile-top-header hidden bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-2xl p-3 mb-3 shadow-xl flex justify-between items-center no-print sticky top-2 z-30">
+            <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-sm shadow">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </span>
+                <div>
+                    <h1 class="text-sm font-black tracking-tight text-amber-400 flex items-center gap-1.5 leading-none">
+                        PRO-ELÉTRICA
+                    </h1>
+                    <span class="text-[9px] text-slate-400 font-mono">NBR 5410 • CAD/BIM</span>
+                </div>
+            </div>
+
+            <!-- SELETOR RÁPIDO DE PAVIMENTO MOBILE & AÇÕES -->
+                <button id="btnInstalarAppMobile" onclick="dispararInstalacaoPWA()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-2 py-1 rounded-lg text-[10px] flex items-center gap-1 shadow transition" title="Instalar Aplicativo no Celular">
+                    <i class="fa-solid fa-download"></i> Instalar
+                </button>
+
+            <div class="flex items-center gap-1.5">
+                <button onclick="alternarPavimentoMobile()" id="btnMobilePavimentoBadge" class="bg-sky-500/20 text-sky-300 border border-sky-500/40 px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-layer-group text-[10px]"></i> <span id="lblNomePavimentoMobile">Térreo</span> ▾
+                </button>
+                                <button id="btnInstalarAppDesktop" onclick="dispararInstalacaoPWA()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="Instalar como aplicativo no computador">
+                    <i class="fa-solid fa-download text-amber-400"></i> <span>Instalar App</span>
+                </button>
+                <button onclick="abrirModalImpressaoPDF()" class="bg-blue-600 hover:bg-blue-500 text-white p-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Imprimir PDF">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                <button onclick="salvarPontoRapido()" class="bg-amber-600 hover:bg-amber-500 text-white p-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Salvar Ponto">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+                <button onclick="abrirDrawerMobile()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 p-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center shadow" title="Menu Completo">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- DRAWER / MENU COMPLETO MOBILE (OFFCANVAS) -->
+        <div id="drawerMenuMobile" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex justify-end hidden p-0">
+            <div class="bg-slate-900 border-l border-slate-800 w-full max-w-xs h-full p-4 overflow-y-auto space-y-4 text-xs shadow-2xl flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-drafting-compass text-amber-400 text-lg"></i>
+                            <h3 class="font-bold text-white text-sm">Ferramentas & Ajustes</h3>
+                        </div>
+                        <button onclick="fecharDrawerMobile()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+                            <i class="fa-solid fa-xmark text-base"></i>
+                        </button>
+                    </div>
+
+                    <!-- PWA BANNER NO DRAWER -->
+                    <div id="pwaBannerDrawer" class="bg-gradient-to-r from-amber-500/15 via-sky-500/15 to-purple-500/15 border border-amber-500/30 p-3 rounded-xl space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center text-xs font-black shadow">
+                                <i class="fa-solid fa-mobile-screen-button"></i>
+                            </span>
+                            <div>
+                                <h4 class="font-bold text-white text-xs">Instalar Aplicativo</h4>
+                                <p class="text-[10px] text-slate-300">Acesse direto da tela inicial em tela cheia</p>
+                            </div>
+                        </div>
+                        <button onclick="dispararInstalacaoPWA(); fecharDrawerMobile();" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-1.5 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition shadow">
+                            <i class="fa-solid fa-download"></i> Adicionar à Tela Inicial
+                        </button>
+                    </div>
+
+                    <!-- GESTÃO DE PROJETOS -->
+                    <div class="space-y-1.5">
+                        <span class="text-[10px] uppercase font-bold text-amber-400 tracking-wider">Projetos & Versões</span>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <button onclick="abrirModalNovoProjeto(); fecharDrawerMobile();" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold p-2 rounded-xl transition flex flex-col items-center gap-1 text-[10px] text-center">
+                                <i class="fa-solid fa-folder-plus text-xs"></i> Novo Projeto
+                            </button>
+                            <button onclick="abrirModalGerenciarProjetos(); fecharDrawerMobile();" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold p-2 rounded-xl transition flex flex-col items-center gap-1 text-[10px] text-center">
+                                <i class="fa-solid fa-clock-rotate-left text-amber-400 text-xs"></i> Versões Salvas
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- PAVIMENTOS E LAJES -->
+                    <div class="space-y-1.5">
+                        <span class="text-[10px] uppercase font-bold text-sky-400 tracking-wider">Pavimentos & Infraestrutura</span>
+                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300 font-semibold">Andar:</span>
+                                <div id="containerBotoesPavimentosMobile" class="flex gap-1"></div>
+                            </div>
+                            <div class="flex justify-between items-center pt-1 border-t border-slate-850">
+                                <span class="text-slate-400 text-[10px]">Passagem:</span>
+                                <div class="flex gap-1">
+                                    <button onclick="alterarPassagemCabos('teto')" class="bg-sky-600 text-white text-[10px] px-2 py-1 rounded font-bold">Teto</button>
+                                    <button onclick="alterarPassagemCabos('chao')" class="bg-slate-800 text-slate-300 text-[10px] px-2 py-1 rounded font-bold">Chão</button>
+                                </div>
+                            </div>
+                            <button onclick="abrirModalNovoPavimento(); fecharDrawerMobile();" class="w-full bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold p-1.5 rounded-lg border border-slate-700 transition text-[10px] flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-plus text-[9px]"></i> Criar Novo Andar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- EXPORTAÇÕES E IMPRESSÃO -->
+                    <div class="space-y-1.5">
+                        <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider">Exportações & Relatórios</span>
+                        <div class="space-y-1">
+                            <button onclick="abrirModalImpressaoPDF(); fecharDrawerMobile();" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold p-2 rounded-xl transition flex items-center justify-center gap-2 text-xs shadow">
+                                <i class="fa-solid fa-file-pdf text-amber-300"></i> Imprimir 6 Pranchas PDF
+                            </button>
+                            <button onclick="exportarParaExcel(); fecharDrawerMobile();" class="w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold p-2 rounded-xl transition flex items-center justify-center gap-2 text-xs">
+                                <i class="fa-solid fa-file-excel text-sm"></i> Exportar Lista Excel (.xlsx)
+                            </button>
+                            <button onclick="abrirModalImportar(); fecharDrawerMobile();" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white font-bold p-2 rounded-xl transition flex items-center justify-center gap-2 text-xs">
+                                <i class="fa-solid fa-file-import"></i> Importar Planta CAD / DWG
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-800 text-[10px] text-slate-500 text-center">
+                    PRO-ELÉTRICA CAD NBR 5410 • Versão Mobile
+                </div>
+            </div>
+        </div>
+
+                <!-- CABEÇALHO -->
+        <header class="desktop-only-header bg-slate-900 border border-slate-800 text-white rounded-2xl p-6 shadow-2xl mb-6 flex flex-col md:flex-row justify-between items-center no-print">
             <div class="mb-4 md:mb-0">
                 <h1 class="text-2xl font-black tracking-tight flex items-center gap-3 text-amber-400">
                     <i class="fa-solid fa-drafting-compass text-3xl"></i>
@@ -60,14 +273,14 @@
                 <button onclick="exportarParaExcel()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-xs shadow-lg shadow-emerald-700/20">
                     <i class="fa-solid fa-file-excel text-sm"></i> Excel (.xlsx)
                 </button>
-                <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5 text-xs border border-slate-700">
-                    <i class="fa-solid fa-print"></i> PDF
+                <button onclick="abrirModalImpressaoPDF()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-2 text-xs border border-blue-400/40 shadow-lg shadow-blue-600/25" title="Exportar Pranchas e Relatórios do Projeto Completo em PDF (6 Folhas ABNT)">
+                    <i class="fa-solid fa-file-pdf text-amber-300 text-sm"></i> PDF / Imprimir (Todas as Folhas)
                 </button>
             </div>
         </header>
 
         <!-- SELETOR DE MODO DE CÁLCULO, REGIME DO IMÓVEL E BARRA GLOBAL DE PAVIMENTOS -->
-        <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6 flex flex-col xl:flex-row justify-between items-center gap-4 no-print">
+        <div class="desktop-only-subbar bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-6 flex flex-col xl:flex-row justify-between items-center gap-4 no-print">
             <!-- SELETOR DE PAVIMENTO ATIVO -->
             <div class="flex flex-wrap items-center gap-2 w-full xl:w-auto">
                 <div class="flex items-center gap-2 mr-2">
@@ -152,7 +365,7 @@
         </div>
 
         <!-- MENU DE NAVEGAÇÃO PRINCIPAL (6 ABAS) -->
-        <nav class="flex border-b border-slate-800 mb-6 space-x-2 no-print overflow-x-auto">
+        <nav class="desktop-only-tabs flex border-b border-slate-800 mb-6 space-x-2 no-print overflow-x-auto">
             <button data-tab="planta" class="tab-btn py-3 px-5 border-b-2 font-bold text-xs rounded-t-xl transition flex items-center gap-2 whitespace-nowrap border-amber-400 text-amber-400 bg-slate-900">
                 <i class="fa-solid fa-pen-ruler"></i> 1. Planta & Cômodos (2D)
             </button>
@@ -256,6 +469,18 @@
                     </div>
 
                     <div class="relative w-full overflow-hidden rounded-xl border-2 border-slate-800 bg-slate-950 shadow-inner">
+                        <!-- CONTROLES DE ZOOM / PAN NA TELA (OTIMIZADO PARA TOUCH & MOBILE) -->
+                        <div class="absolute top-2 right-2 z-10 flex items-center gap-1 bg-slate-900/90 backdrop-blur-sm border border-slate-700/80 rounded-xl p-1 shadow-lg">
+                            <button onclick="ajustarZoomCad(1.15)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center transition active:scale-90" title="Aumentar Zoom">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i>
+                            </button>
+                            <button onclick="ajustarZoomCad(0.87)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center transition active:scale-90" title="Diminuir Zoom">
+                                <i class="fa-solid fa-magnifying-glass-minus"></i>
+                            </button>
+                            <button onclick="resetarZoomCad()" class="px-2 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-[10px] flex items-center justify-center transition active:scale-90" title="Centralizar e redefinir zoom padrão">
+                                100%
+                            </button>
+                        </div>
                         <canvas id="cadCanvas" width="900" height="520" class="w-full h-[520px]"></canvas>
                     </div>
 
@@ -317,39 +542,63 @@
                         <button id="btnAdicionarInterruptorRapida" onclick="abrirModalPontoNovo('INTERRUPTOR')" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-purple-700 hover:bg-purple-600 text-white flex items-center gap-1.5 shadow-md shadow-purple-700/20" title="Adicionar interruptor de parede">
                             <i class="fa-solid fa-toggle-on"></i> + Interruptor
                         </button>
+                        <!-- BOTÃO DE ROTEAMENTO HORIZONTAL / RADIAL DE TOMADAS -->
+                        <button id="btnTogglePassagemTomadasToolbar" onclick="alternarPassagemTomadasComodo()" class="px-3 py-1.5 rounded-xl font-bold text-xs bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/40 flex items-center gap-1.5 shadow" title="Alternar passagem das tomadas deste cômodo entre Horizontal na Parede e Radial pelo Teto">
+                            <i class="fa-solid fa-arrows-left-right text-emerald-400"></i> Tomadas: <span id="lblStatusPassagemTomadaToolbar">Horizontal (Parede)</span>
+                        </button>
                         <button onclick="resetarTodasCurvasEletrodutos()" class="px-2.5 py-1.5 rounded-xl text-slate-400 hover:text-amber-400 bg-slate-950 border border-slate-800 text-xs" title="Redefinir traçados">
                             <i class="fa-solid fa-rotate-left"></i> Redefinir
                         </button>
                     </div>
                 </div>
 
-                <!-- LEGENDA TÉCNICA -->
-                <div class="flex flex-wrap items-center gap-4 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
-                    <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Legenda NBR 5410:</span>
-                    <span class="flex items-center gap-1.5 text-emerald-400">
+                <!-- LEGENDA TÉCNICA NBR 5410 / NBR 5444 PADRONIZADA POR CORES -->
+                <div class="flex flex-wrap items-center gap-3 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-[11px]">
+                    <span class="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Cores & Linhas:</span>
+                    <span class="flex items-center gap-1.5 text-emerald-400 font-semibold" title="Tomadas de Uso Geral - Passagem horizontal na parede ou individual">
                         <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 border border-white flex items-center justify-center text-[8px] font-bold text-slate-950">G</span>
-                        TUG (100/600VA)
+                        TUG (#10b981)
                     </span>
-                    <span class="flex items-center gap-1.5 text-blue-400">
+                    <span class="flex items-center gap-1.5 text-blue-400 font-semibold" title="Tomadas de Uso Específico 220V - Circuito independente">
                         <span class="w-3.5 h-3.5 rounded-sm bg-blue-500 border border-white flex items-center justify-center text-[8px] font-bold text-white">E</span>
-                        TUE (220V)
+                        TUE (#3b82f6)
                     </span>
-                    <span class="flex items-center gap-1.5 text-amber-400">
-                        <span class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-white"></span>
-                        Lâmpada no Teto
+                    <span class="flex items-center gap-1.5 text-amber-400 font-semibold" title="Alimentação de Lâmpadas no Teto">
+                        <span class="w-3.5 h-3.5 rounded-full bg-amber-400 border border-white flex items-center justify-center text-[8px] font-bold text-slate-950">💡</span>
+                        Lâmpada (#f59e0b)
                     </span>
-                    <span class="flex items-center gap-1.5 text-sky-400">
-                        <span class="w-5 h-0.5 bg-sky-400 inline-block border-t-2 border-dashed border-sky-400"></span>
-                        Eletroduto Curvo
+                    <span class="flex items-center gap-1.5 text-purple-400 font-semibold" title="Condutor de retorno do interruptor para a lâmpada">
+                        <span class="w-3.5 h-3.5 rounded-full bg-purple-500 border border-white flex items-center justify-center text-[8px] font-bold text-white">R</span>
+                        Retorno (#a855f7)
+                    </span>
+                    <span class="flex items-center gap-1.5 text-sky-400 font-semibold" title="Infraestrutura pelo Teto / Laje">
+                        <span class="w-5 h-1 bg-sky-400 inline-block border-t-2 border-dashed border-sky-400"></span>
+                        Infra Teto (#38bdf8)
+                    </span>
+                    <span class="flex items-center gap-1.5 text-orange-400 font-semibold" title="Infraestrutura pelo Chão / Piso / Contrapiso Mesclado">
+                        <span class="w-5 h-1 bg-orange-500 inline-block border-t-2 border-dotted border-orange-500"></span>
+                        Infra Chão (#f97316)
                     </span>
                     <span class="flex items-center gap-1.5 text-amber-300 font-bold">
                         <span class="w-3.5 h-3.5 rounded bg-amber-600 border border-amber-300 flex items-center justify-center text-[9px]">▲</span>
-                        Prumada Elétrica (Sobe/Desce)
+                        Prumada Vertical
                     </span>
                 </div>
 
                 <!-- CANVAS DE INSTALAÇÕES 2D EXPANDIDO (1120x620) -->
                 <div class="relative w-full overflow-hidden rounded-2xl border-2 border-sky-950/70 bg-slate-950 shadow-2xl">
+                        <!-- CONTROLES DE ZOOM NA TELA DE INSTALAÇÕES (TOUCH / MOBILE) -->
+                        <div class="absolute top-2 right-2 z-10 flex items-center gap-1 bg-slate-900/90 backdrop-blur-sm border border-slate-700/80 rounded-xl p-1 shadow-lg">
+                            <button onclick="ajustarZoomCad(1.15)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center transition active:scale-90" title="Aumentar Zoom">
+                                <i class="fa-solid fa-magnifying-glass-plus"></i>
+                            </button>
+                            <button onclick="ajustarZoomCad(0.87)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center transition active:scale-90" title="Diminuir Zoom">
+                                <i class="fa-solid fa-magnifying-glass-minus"></i>
+                            </button>
+                            <button onclick="resetarZoomCad()" class="px-2 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-[10px] flex items-center justify-center transition active:scale-90" title="100%">
+                                100%
+                            </button>
+                        </div>
                     <canvas id="instalacoesCanvas" width="1120" height="620" class="w-full h-[620px] cursor-crosshair"></canvas>
                     
                     <div id="dicaModoInstalacoes" class="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-sm border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 pointer-events-none shadow-lg">
@@ -772,26 +1021,260 @@
 
         <!-- ABA 6: GUIA NBR 5410 -->
         <div id="tab-duvidas" class="tab-content space-y-6">
-            <div class="bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-800 text-xs space-y-4">
-                <h2 class="text-lg font-black text-amber-400 flex items-center gap-2">
-                    <i class="fa-solid fa-book-bookmark text-xl"></i> Guia Técnico NBR 5410 - Multi-Pavimentos & BIM 3D
-                </h2>
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                    <h3 class="font-bold text-amber-400 mb-1">1. Prumadas Verticais e Subida de Condutores (Shafts)</h3>
-                    <p class="text-slate-300 leading-relaxed">
-                        Em residências e sobrados de múltiplos pavimentos, os circuitos do piso superior derivam do quadro geral (ou de um quadro secundário) através de <strong>prumadas verticais</strong>. O sistema calcula automaticamente a subida através das lajes (pé-direito de 2.8m + espessura estrutural de 0.2m = 3.0m verticais por andar).
-                    </p>
+            <!-- CABEÇALHO DO GUIA NBR 5410 -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 p-6 rounded-2xl shadow-2xl border border-slate-800 text-xs space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-5">
+                    <div>
+                        <h2 class="text-xl font-black text-amber-400 flex items-center gap-3">
+                            <i class="fa-solid fa-book-bookmark text-2xl"></i>
+                            Memorial Técnico & Guia Completo NBR 5410
+                        </h2>
+                        <p class="text-slate-400 text-xs mt-1">
+                            Critérios normativos de dimensionamento de condutores, ampacidades, quedas de tensão, infraestrutura e proteções
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="abrirModalImpressaoPDF()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-2 text-xs">
+                            <i class="fa-solid fa-print"></i> Imprimir Folha NBR 5410
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                    <h3 class="font-bold text-amber-400 mb-1">2. Visualização 3D e Alturas Técnicas de Tomadas</h3>
-                    <p class="text-slate-300 leading-relaxed">
-                        A maquete 3D WebGL posiciona cada elemento na sua cota Z/Y exata:
-                        • <strong>Tomada Baixa</strong>: 30 cm do piso acabado (NBR 5410 item 6.5.2.2).<br>
-                        • <strong>Tomada Média</strong>: 120 cm do piso (bancadas, interruptores).<br>
-                        • <strong>Tomada Alta</strong>: 200 a 220 cm do piso (chuveiros, ar-condicionado, exaustores).
+
+                <!-- SEÇÃO 1: MEMORIAL DINÂMICO DOS CIRCUITOS DO PROJETO ATUAL -->
+                <div class="bg-slate-950 p-5 rounded-xl border border-amber-500/30 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-black text-sm text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-amber-400"></i>
+                            1. Justificativa das Bitolas Adotadas nos Circuitos deste Projeto
+                        </h3>
+                        <span class="text-[11px] font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                            Cálculo em Tempo Real
+                        </span>
+                    </div>
+                    <p class="text-slate-300 leading-relaxed text-xs">
+                        A tabela abaixo relaciona todos os circuitos dimensionados para a edificação, calculando a corrente de projeto (<strong class="text-sky-300 font-mono">I<sub>b</sub></strong>), disjuntor termomagnético (<strong class="text-amber-300 font-mono">I<sub>n</sub></strong>), a bitola nominal utilizada (<strong class="text-emerald-300 font-mono">S</strong>) e a fundamentação regulamentar estrita da <strong>NBR 5410</strong>:
+                    </p>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-800">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900 text-slate-300 uppercase text-[10px] tracking-wider border-b border-slate-800">
+                                    <th class="p-2.5">Circuito</th>
+                                    <th class="p-2.5">Descrição & Ambiente</th>
+                                    <th class="p-2.5">Tipo</th>
+                                    <th class="p-2.5">Potência</th>
+                                    <th class="p-2.5">Tensão</th>
+                                    <th class="p-2.5 font-mono">I<sub>b</sub> (A)</th>
+                                    <th class="p-2.5 font-mono">Disjuntor</th>
+                                    <th class="p-2.5 font-mono text-amber-300">Bitola (mm²)</th>
+                                    <th class="p-2.5">Justificativa Técnica NBR 5410</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaMemorialCircuitosAba6" class="divide-y divide-slate-850">
+                                <!-- Preenchido dinamicamente via renderizarMemorialAba6() -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2: POR QUE CADA BITOLA FOI UTILIZADA NO PROJETO? (DETALHAMENTO TÉCNICO) -->
+                <div class="space-y-4">
+                    <h3 class="font-black text-sm text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-code-compare"></i>
+                        2. Por que estas Bitolas são Utilizadas? Fundamentação por Seção
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- 1.5 mm² -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-850 pb-2">
+                                <span class="font-black text-amber-400 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center font-mono text-xs">1.5</span>
+                                    Bitola 1,5 mm² — Circuitos de Iluminação
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">Disjuntor 10A / 16A</span>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                • <strong>Seção Mínima Obrigatória (Item 6.2.6.1.1, Tabela 47)</strong>: A NBR 5410 determina que a menor seção de condutor de cobre permitida em instalações fixas de iluminação é <strong>1,5 mm²</strong>, mesmo quando a carga total em lâmpadas LED demande correntes baixas (&lt; 2A). Isso garante integridade mecânica na tração dos fios dentro dos eletrodutos.<br>
+                                • <strong>Capacidade de Condução (Tabela 36, Método B1)</strong>: Suporta até <strong>17,5A</strong> (2 condutores carregados, isolação PVC 70°C). Com fator de agrupamento, opera com folga térmica absoluta sob disjuntor de 10A.
+                            </p>
+                        </div>
+
+                        <!-- 2.5 mm² -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-850 pb-2">
+                                <span class="font-black text-emerald-400 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center justify-center font-mono text-xs">2.5</span>
+                                    Bitola 2,5 mm² — Tomadas de Uso Geral (TUG)
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">Disjuntor 16A / 20A</span>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                • <strong>Seção Mínima para Circuitos de Força (Item 6.2.6.1.1, Tabela 47)</strong>: A norma proíbe condutores menores que <strong>2,5 mm²</strong> para qualquer circuito de tomadas (TUG ou TUE).<br>
+                                • <strong>Capacidade de Condução (Tabela 36, Método B1)</strong>: Suporta até <strong>24A</strong>. Coordenado com disjuntor padrão de 16A ou 20A, assegura que mesmo tomadas padrão NBR 14136 de 10A ou 20A sob regime de consumo contínuo (ferro, aspirador, secador) não superaqueçam o circuito.
+                            </p>
+                        </div>
+
+                        <!-- 4.0 mm² -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-850 pb-2">
+                                <span class="font-black text-blue-400 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center justify-center font-mono text-xs">4.0</span>
+                                    Bitola 4,0 mm² — Cargas Médias & Cozinha/Serviço
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">Disjuntor 25A</span>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                • <strong>Ampacidade Térmica (Tabela 36, Método B1)</strong>: Suporta até <strong>32A</strong> em regime normal. Aplicando o Fator de Correção de Agrupamento (<strong class="text-sky-300">FCA = 0,70</strong> para 3 circuitos na prumada), a corrente corrigida admissível é de <strong>22,4A a 25,6A</strong>.<br>
+                                • <strong>Aplicações Típicas</strong>: Circuitos dedicados para micro-ondas, forno elétrico, lava-louças, ar-condicionado de 18.000 a 24.000 BTU e bancadas de cozinha com tomadas de 600VA simultâneas.
+                            </p>
+                        </div>
+
+                        <!-- 6.0 mm² -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-850 pb-2">
+                                <span class="font-black text-indigo-400 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 flex items-center justify-center font-mono text-xs">6.0</span>
+                                    Bitola 6,0 mm² — Chuveiros Elétricos (5500W a 6800W)
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">Disjuntor 32A</span>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                • <strong>Dimensionamento por Carga (Item 6.2.5.1)</strong>: Um chuveiro residencial padrão de 5500W em 220V demanda <strong class="text-amber-300 font-mono">I<sub>b</sub> = 25A</strong>. Se o modelo for de 6800W, a corrente atinge <strong class="text-amber-300 font-mono">30,9A</strong>.<br>
+                                • <strong>Capacidade de Condução (Tabela 36, Método B1)</strong>: Suporta <strong>41A</strong>. Com disjuntor de 32A, a condição regulamentar <strong class="text-sky-300 font-mono">I<sub>b</sub> (25A) ≤ I<sub>n</sub> (32A) ≤ I<sub>z</sub> (41A)</strong> é atendida com 100% de segurança térmica e queda de tensão controlada.
+                            </p>
+                        </div>
+
+                        <!-- 10.0 mm² -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-850 pb-2">
+                                <span class="font-black text-purple-400 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40 flex items-center justify-center font-mono text-xs">10</span>
+                                    Bitola 10,0 mm² — Chuveiros 7500W+ & Sub-Quadros
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">Disjuntor 40A / 50A</span>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                • <strong>Aparelhos de Alta Potência</strong>: Chuveiros modernos turbo de 7500W a 7800W em 220V exigem <strong class="text-amber-300 font-mono">I<sub>b</sub> = 34,1A a 35,5A</strong>. Em trechos longos, o cabo de 6 mm² excederia o limite térmico após agrupamento.<br>
+                                • <strong>Capacidade de Condução</strong>: Suporta até <strong>57A</strong> (Método B1), sendo também a bitola adotada para a prumada de interligação entre o Quadro do Térreo (QDT-G) e o Quadro Superior (QDT-P).
+                            </p>
+                        </div>
+
+                        <!-- 16.0 a 25.0 mm² -->
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                            <div class="flex items-center justify-between border-b border-slate-850 pb-2">
+                                <span class="font-black text-rose-400 flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center justify-center font-mono text-xs">16+</span>
+                                    Bitola 16 a 25 mm² — Ramal de Entrada da Concessionária
+                                </span>
+                                <span class="text-[10px] text-slate-400 font-mono">Disjuntor Geral 63A / 80A</span>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                • <strong>Demanda Global Residencial (Item 9.5.2)</strong>: Dimensionado pela soma das potências com aplicação dos fatores de demanda da concessionária local (Copel, Enel, Cemig, CPFL).<br>
+                                • <strong>Capacidade de Condução</strong>: 16 mm² suporta até <strong>76A</strong> e 25 mm² suporta até <strong>101A</strong>, garantindo suprimento total sem oscilações de luminosidade no acionamento simultâneo de cargas.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 3: OS 5 CRITÉRIOS DE DIMENSIONAMENTO OBRIGATÓRIOS DA NBR 5410 -->
+                <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-4">
+                    <h3 class="font-black text-sm text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        3. Os 5 Critérios de Dimensionamento que o Software Aplica Automaticamente
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="font-bold text-amber-300 block mb-1">Critério 1: Seção Mínima</span>
+                            <p class="text-slate-400 text-[11px] leading-relaxed">
+                                Tabela 47: 1,5 mm² para iluminação e 2,5 mm² para força. É o piso obrigatório por resistência mecânica.
+                            </p>
+                        </div>
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="font-bold text-sky-300 block mb-1">Critério 2: Capacidade Térmica (Ampacidade)</span>
+                            <p class="text-slate-400 text-[11px] leading-relaxed">
+                                Método B1 em eletrodutos embutidos em alvenaria. Condutores de cobre com isolação PVC 70°C sob regime contínuo.
+                            </p>
+                        </div>
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="font-bold text-emerald-300 block mb-1">Critério 3: Fatores de Correção</span>
+                            <p class="text-slate-400 text-[11px] leading-relaxed">
+                                Fator de Agrupamento (FCA - Tab. 42: 0,80 para 2 circ; 0,70 para 3 circ) e Temperatura ambiente (FCT - Tab. 40).
+                            </p>
+                        </div>
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="font-bold text-purple-300 block mb-1">Critério 4: Queda de Tensão Máxima</span>
+                            <p class="text-slate-400 text-[11px] leading-relaxed">
+                                Item 6.2.7: Limite de 4% a partir do quadro terminal ou 5% desde o ponto de entrega da concessionária.
+                            </p>
+                        </div>
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="font-bold text-rose-300 block mb-1">Critério 5: Coordenação Disjuntor x Cabo</span>
+                            <p class="text-slate-400 text-[11px] leading-relaxed">
+                                Regra de ouro: <strong class="text-white font-mono">I<sub>b</sub> ≤ I<sub>n</sub> ≤ I<sub>z</sub></strong> e <strong class="text-white font-mono">I<sub>2</sub> ≤ 1,45 · I<sub>z</sub></strong>. O disjuntor atua antes do cabo queimar.
+                            </p>
+                        </div>
+                        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-800">
+                            <span class="font-bold text-teal-300 block mb-1">Taxa de Ocupação de Tubos</span>
+                            <p class="text-slate-400 text-[11px] leading-relaxed">
+                                Item 6.2.11: Máximo 40% da área útil do eletroduto ocupada por 3 ou mais cabos, permitindo dissipação de calor.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 4: CÓDIGO OBRIGATÓRIO DE CORES DOS CONDUTORES (ITEM 6.1.5.3) -->
+                <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-3">
+                    <h3 class="font-black text-sm text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-palette"></i>
+                        4. Padrão Obrigatório de Cores dos Condutores (NBR 5410 Item 6.1.5.3)
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                        <div class="bg-slate-900 p-3 rounded-xl border border-sky-500/30 flex items-center gap-3">
+                            <span class="w-5 h-5 rounded-full bg-blue-500 border-2 border-white shrink-0"></span>
+                            <div>
+                                <strong class="text-white block">Neutro (N)</strong>
+                                <span class="text-blue-400 text-[11px]">Azul-Claro Obrigatório</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-emerald-500/30 flex items-center gap-3">
+                            <span class="w-5 h-5 rounded-full bg-emerald-500 border-2 border-amber-300 shrink-0"></span>
+                            <div>
+                                <strong class="text-white block">Proteção (PE / Terra)</strong>
+                                <span class="text-emerald-400 text-[11px]">Verde ou Verde-Amarelo</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-red-500/30 flex items-center gap-3">
+                            <span class="w-5 h-5 rounded-full bg-red-600 border-2 border-white shrink-0"></span>
+                            <div>
+                                <strong class="text-white block">Fase (R / S / T)</strong>
+                                <span class="text-red-400 text-[11px]">Vermelho, Preto, Marrom</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-amber-500/30 flex items-center gap-3">
+                            <span class="w-5 h-5 rounded-full bg-amber-400 border-2 border-white shrink-0"></span>
+                            <div>
+                                <strong class="text-white block">Retorno de Iluminação</strong>
+                                <span class="text-amber-300 text-[11px]">Amarelo (Distinto de N/PE)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 5: DISPOSITIVO DR (DIFERENCIAL RESIDUAL) & DPS -->
+                <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
+                    <h3 class="font-black text-sm text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        5. Proteção Contra Choques (DR 30mA) e Surtos Atmosféricos (DPS)
+                    </h3>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        • <strong>Dispositivo DR Obrigatório (Item 5.1.3.2)</strong>: Alta sensibilidade (<strong class="text-emerald-300">I<sub>Δn</sub> ≤ 30mA</strong>) obrigatório em circuitos que atendam: banheiros, cozinhas, lavanderias, garagens, varandas e quaisquer tomadas em áreas externas ou que alimentem equipamentos externos.<br>
+                        • <strong>DPS Classe II (Item 5.4)</strong>: Instalado no Quadro de Distribuição Geral entre Fase-Terra e Neutro-Terra para proteger eletrodomésticos e eletrônicos contra descargas atmosféricas (raios).
                     </p>
                 </div>
             </div>
+        </div>
         </div>
 
     </div>
@@ -1156,6 +1639,21 @@
                         </div>
                     </div>
 
+                    <!-- PASSAGEM DE CABOS DE TOMADAS NO CÔMODO (NOVO CONTROLE NBR 5410) -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-bold text-amber-400 uppercase text-[11px] flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrows-left-right"></i> Passagem de Cabos das Tomadas (TUG)
+                            </label>
+                            <span class="text-[10px] text-slate-400 font-mono">Mais de 1 tomada</span>
+                        </div>
+                        <select id="selPassagemTomadasComodo" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-amber-400 outline-none">
+                            <option value="horizontal">↔️ Horizontal nas Paredes (Tomada a Tomada / Encadeada - Padrão NBR 5410)</option>
+                            <option value="radial">⬆️ Radial pelo Teto (Cada tomada sobe individualmente até a caixa do teto)</option>
+                        </select>
+                        <p class="text-[10px] text-slate-400 italic">No modo horizontal, o eletroduto corre na alvenaria ligando uma tomada à outra, economizando tubulação e fios.</p>
+                    </div>
+
                     <!-- SEÇÃO DE CARGAS INDIVIDUAIS (TUG e TUE) -->
                     <div class="pt-3 border-t border-slate-800 space-y-2.5">
                         <div class="flex items-center justify-between">
@@ -1428,21 +1926,26 @@
             <div>
                 <p class="text-xs text-slate-300" id="txtDescricaoTransicao">Cômodos próximos detectados. Defina a transição:</p>
             </div>
-            <div class="grid grid-cols-3 gap-3 pt-1">
-                <button onclick="definirTipoTransicaoAtiva('porta')" class="bg-slate-950 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 p-3.5 rounded-xl text-center flex flex-col items-center gap-2 transition group">
-                    <i class="fa-solid fa-door-open text-amber-400 text-2xl group-hover:scale-110 transition"></i>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                <button onclick="definirTipoTransicaoAtiva('porta')" class="bg-slate-950 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 p-3 rounded-xl text-center flex flex-col items-center gap-1.5 transition group">
+                    <i class="fa-solid fa-door-open text-amber-400 text-xl group-hover:scale-110 transition"></i>
                     <span class="font-bold text-xs text-white">Porta</span>
-                    <span class="text-[10px] text-slate-400">Giro 90°</span>
+                    <span class="text-[9px] text-slate-400">Giro 90°</span>
                 </button>
-                <button onclick="definirTipoTransicaoAtiva('corredor')" class="bg-slate-950 hover:bg-slate-800 border border-sky-500/40 hover:border-sky-400 p-3.5 rounded-xl text-center flex flex-col items-center gap-2 transition group">
-                    <i class="fa-solid fa-route text-sky-400 text-2xl group-hover:scale-110 transition"></i>
+                <button onclick="definirTipoTransicaoAtiva('corredor')" class="bg-slate-950 hover:bg-slate-800 border border-sky-500/40 hover:border-sky-400 p-3 rounded-xl text-center flex flex-col items-center gap-1.5 transition group">
+                    <i class="fa-solid fa-route text-sky-400 text-xl group-hover:scale-110 transition"></i>
                     <span class="font-bold text-xs text-white">Corredor</span>
-                    <span class="text-[10px] text-slate-400">Circulação</span>
+                    <span class="text-[9px] text-slate-400">Circulação</span>
                 </button>
-                <button onclick="definirTipoTransicaoAtiva('vao_livre')" class="bg-slate-950 hover:bg-slate-800 border border-emerald-500/40 hover:border-emerald-400 p-3.5 rounded-xl text-center flex flex-col items-center gap-2 transition group">
-                    <i class="fa-solid fa-border-none text-emerald-400 text-2xl group-hover:scale-110 transition"></i>
+                <button onclick="definirTipoTransicaoAtiva('vao_livre')" class="bg-slate-950 hover:bg-slate-800 border border-emerald-500/40 hover:border-emerald-400 p-3 rounded-xl text-center flex flex-col items-center gap-1.5 transition group">
+                    <i class="fa-solid fa-border-none text-emerald-400 text-xl group-hover:scale-110 transition"></i>
                     <span class="font-bold text-xs text-white">Vão Livre</span>
-                    <span class="text-[10px] text-slate-400">Passagem aberta</span>
+                    <span class="text-[9px] text-slate-400">Passagem aberta</span>
+                </button>
+                <button onclick="definirTipoTransicaoAtiva('parede')" class="bg-slate-950 hover:bg-slate-800 border border-slate-600/70 hover:border-amber-400 p-3 rounded-xl text-center flex flex-col items-center gap-1.5 transition group">
+                    <i class="fa-solid fa-cubes-stacked text-amber-400 text-xl group-hover:scale-110 transition"></i>
+                    <span class="font-bold text-xs text-white">Parede</span>
+                    <span class="text-[9px] text-slate-400">Alvenaria Fechada</span>
                 </button>
             </div>
             <div class="pt-2 border-t border-slate-800 flex justify-end">
@@ -1452,6 +1955,216 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL DE INSERÇÃO RÁPIDA NO DUPLO CLIQUE (NOVA INTERAÇÃO NBR 5410) -->
+    <div id="modalAdicionarPontoRapido" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/60">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-bolt-lightning"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <span>Adicionar Ponto Elétrico</span>
+                            <span id="badgeComodoAlvoRapido" class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">Sala</span>
+                        </h3>
+                        <p class="text-[11px] text-slate-400">Selecione o elemento para inserir no local exato do duplo clique</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalAdicionarPontoRapido()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4 text-xs">
+                <!-- GRID COM OS 4 TIPOS PRINCIPAIS -->
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- 1. TUG -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-emerald-500/40 hover:border-emerald-400 transition space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-emerald-400 flex items-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-plug"></i> TUG (Uso Geral)
+                            </span>
+                            <span class="text-[9px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono">127V/220V</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight">Tomadas para eletrodomésticos, TV, abajur, carregadores</p>
+                        <div class="grid grid-cols-2 gap-1.5 pt-1">
+                            <button onclick="inserirPontoRapido('TUG', 100, 127, 'baixa', 'TUG 100W Baixa (0.30m)')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + 100W Baixa
+                            </button>
+                            <button onclick="inserirPontoRapido('TUG', 600, 127, 'media', 'TUG 600W Média (1.20m)')" class="bg-emerald-800 hover:bg-emerald-700 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + 600W Média
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. TUE -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-blue-500/40 hover:border-blue-400 transition space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-blue-400 flex items-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-bolt"></i> TUE (Específica)
+                            </span>
+                            <span class="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-mono">220V</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight">Cargas dedicadas exclusivas: Ar-condicionado, chuveiro, forno</p>
+                        <div class="grid grid-cols-2 gap-1.5 pt-1">
+                            <button onclick="inserirPontoRapido('TUE', 1500, 220, 'alta', 'Ar Condicionado 1500W')" class="bg-blue-700 hover:bg-blue-600 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + Ar (1500W)
+                            </button>
+                            <button onclick="inserirPontoRapido('TUE', 5500, 220, 'alta', 'Chuveiro 5500W')" class="bg-blue-800 hover:bg-blue-700 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + Chuveiro
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3. LÂMPADA -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-amber-500/40 hover:border-amber-400 transition space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-amber-400 flex items-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-lightbulb"></i> Lâmpada (Teto)
+                            </span>
+                            <span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-mono">127V</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight">Ponto de iluminação central ou adicional no forro</p>
+                        <div class="grid grid-cols-2 gap-1.5 pt-1">
+                            <button onclick="inserirPontoRapido('ILUM', 100, 127, 'teto', 'Lâmpada 100VA')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + Luz 100VA
+                            </button>
+                            <button onclick="inserirPontoRapido('ILUM', 60, 127, 'teto', 'Lâmpada 60VA')" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + Luz 60VA
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4. RETORNO & INTERRUPTOR -->
+                    <div class="bg-slate-950 p-3 rounded-xl border border-purple-500/40 hover:border-purple-400 transition space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-purple-400 flex items-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-toggle-on"></i> Interruptor & Retorno
+                            </span>
+                            <span class="text-[9px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-mono">Fase+Ret</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-tight">Interruptor de parede conectado por retorno à lâmpada</p>
+                        <div class="grid grid-cols-2 gap-1.5 pt-1">
+                            <button onclick="inserirPontoRapido('INTERRUPTOR', 0, 127, 'media', 'Interruptor Simples c/ Retorno')" class="bg-purple-700 hover:bg-purple-600 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + Interr. Simples
+                            </button>
+                            <button onclick="inserirPontoRapido('INTERRUPTOR', 0, 127, 'media', 'Interruptor Paralelo Three-Way')" class="bg-purple-800 hover:bg-purple-700 text-white font-bold py-1.5 px-2 rounded-lg text-[10px] transition text-center">
+                                + Three-Way
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AÇÃO ALTERNATIVA: EDITAR DIMENSÕES DO CÔMODO -->
+                <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+                    <button type="button" onclick="editarComodoAlvoRapido()" class="text-amber-400 hover:text-amber-300 font-semibold text-[11px] flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-to-square"></i> Editar dimensões deste cômodo
+                    </button>
+                    <button type="button" onclick="fecharModalAdicionarPontoRapido()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-1.5 px-3 rounded-xl transition text-xs">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EXPORTAÇÃO PDF: TODAS AS FOLHAS DO PROJETO ABNT (NOVO) -->
+    <div id="modalImpressaoPDF" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/80">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-print"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                            <span>Central de Impressão & Exportação PDF</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">6 Pranchas ABNT</span>
+                        </h3>
+                        <p class="text-[11px] text-slate-400">Gere todas as pranchas técnicas regulamentadas com carimbo técnico e memorial</p>
+                    </div>
+                </div>
+                <button onclick="fecharModalImpressaoPDF()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-4 text-xs">
+                <!-- LISTA DAS 6 FOLHAS DO PROJETO -->
+                <div class="space-y-2">
+                    <span class="font-bold text-sky-400 uppercase text-[11px] block">Pranchas que compõem o Projeto Completo:</span>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300 text-[11px]">
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-sky-500/20 text-sky-300 flex items-center justify-center font-bold font-mono text-xs">01</span>
+                            <div>
+                                <strong class="text-white block">Folha 01: Planta Baixa CAD 2D</strong>
+                                <span class="text-[10px] text-slate-400">Arquitetura, cotas, áreas e perímetros</span>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold font-mono text-xs">02</span>
+                            <div>
+                                <strong class="text-white block">Folha 02: Projeto Elétrico 2D</strong>
+                                <span class="text-[10px] text-slate-400">TUG, TUE, luz, retornos e tubulações</span>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-300 flex items-center justify-center font-bold font-mono text-xs">03</span>
+                            <div>
+                                <strong class="text-white block">Folha 03: Maquete 3D BIM</strong>
+                                <span class="text-[10px] text-slate-400">Isométrico dos pavimentos e prumadas</span>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold font-mono text-xs">04</span>
+                            <div>
+                                <strong class="text-white block">Folha 04: Quadro de Distribuição</strong>
+                                <span class="text-[10px] text-slate-400">QDT DIN, disjuntores e balanceamento</span>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold font-mono text-xs">05</span>
+                            <div>
+                                <strong class="text-white block">Folha 05: Lista de Materiais</strong>
+                                <span class="text-[10px] text-slate-400">Quantitativo de cabos, tubos e caixas</span>
+                            </div>
+                        </div>
+                        <div class="p-2.5 bg-slate-950 rounded-xl border border-slate-800 flex items-center gap-2.5">
+                            <span class="w-6 h-6 rounded-lg bg-rose-500/20 text-rose-300 flex items-center justify-center font-bold font-mono text-xs">06</span>
+                            <div>
+                                <strong class="text-white block">Folha 06: Memorial NBR 5410</strong>
+                                <span class="text-[10px] text-slate-400">Critérios de bitolas e justificativa legal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFORMAÇÕES DO CARIMBO TÉCNICO -->
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                    <span class="font-bold text-amber-400 block text-[11px]">Dados do Carimbo Técnico (Prancha ABNT):</span>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="txtPdfNomeObra" type="text" placeholder="Nome da Obra / Residência" value="Residência Unifamiliar NBR 5410" class="bg-slate-900 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none">
+                        <input id="txtPdfProjetista" type="text" placeholder="Responsável Técnico / CREA" value="Eng. Eletricista Responsável" class="bg-slate-900 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none">
+                    </div>
+                </div>
+
+                <!-- BOTÕES DE IMPRESSÃO -->
+                <div class="pt-2 flex flex-col sm:flex-row justify-end gap-2">
+                    <button type="button" onclick="imprimirApenasFolhaAtual()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 px-4 rounded-xl transition text-xs border border-slate-700">
+                        Imprimir Folha Atual
+                    </button>
+                    <button type="button" onclick="imprimirTodasFolhasProjeto()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black py-2.5 px-5 rounded-xl transition flex items-center justify-center gap-2 text-xs shadow-lg shadow-blue-600/30">
+                        <i class="fa-solid fa-file-pdf text-amber-300 text-sm"></i> Imprimir Todas as 6 Folhas (Projeto Completo)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTAINER OCULTO NA TELA E VISÍVEL APENAS NA IMPRESSÃO (@media print) PARA AS 6 FOLHAS -->
+    <div id="containerPranchasImpressaoCompleta" class="hidden print:block w-full"></div>
 
     <!-- MODAL DE PONTO ELÉTRICO -->
     <div id="modalPontoEletrico" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
@@ -2542,29 +3255,171 @@
         });
 
         // NAVEGAÇÃO DE ABAS
+        
+        // =====================================================================
+        // CONTROLADORES DE INTERFACE MOBILE & TOUCH
+        // =====================================================================
+        function abrirDrawerMobile() {
+            const drawer = document.getElementById('drawerMenuMobile');
+            if (drawer) drawer.classList.remove('hidden');
+        }
+
+        function fecharDrawerMobile() {
+            const drawer = document.getElementById('drawerMenuMobile');
+            if (drawer) drawer.classList.add('hidden');
+        }
+
+        function toggleSpeedDialMobile() {
+            const items = document.getElementById('mobileSpeedDialItems');
+            const icon = document.getElementById('iconeFabPrincipal');
+            if (!items) return;
+            const isHidden = items.classList.contains('hidden');
+            if (isHidden) {
+                items.classList.remove('hidden');
+                items.classList.add('flex');
+                if (icon) icon.className = 'fa-solid fa-xmark text-xl transition transform rotate-90';
+            } else {
+                items.classList.add('hidden');
+                items.classList.remove('flex');
+                if (icon) icon.className = 'fa-solid fa-plus text-xl transition transform';
+            }
+        }
+
+        function alternarPavimentoMobile() {
+            if (!state.pavimentos || state.pavimentos.length <= 1) return;
+            const pIdx = state.pavimentos.findIndex(p => p.id === state.pavimentoAtivoId);
+            const proxIdx = (pIdx + 1) % state.pavimentos.length;
+            selecionarPavimento(state.pavimentos[proxIdx].id);
+
+            const lbl = document.getElementById('lblNomePavimentoMobile');
+            if (lbl) lbl.textContent = state.pavimentos[proxIdx].nome.replace('Pavimento ', '');
+        }
+
+        function ajustarZoomCad(fator) {
+            state.escala = Math.max(15, Math.min(80, state.escala * fator));
+            desenharCAD();
+            desenharInstalacoes();
+        }
+
+        function resetarZoomCad() {
+            state.escala = 35;
+            desenharCAD();
+            desenharInstalacoes();
+        }
+
+        // SUPORTE A TOQUE (TOUCH EVENTS) EM CANVASES 2D
+        function vincularEventosTouchCanvas(canvasId, isInstalacoes = false) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+
+            let lastTouchTime = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    const t = e.touches[0];
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    const mx = (t.clientX - rect.left) * (isInstalacoes ? scaleX : 1);
+                    const my = (t.clientY - rect.top) * (isInstalacoes ? scaleY : 1);
+
+                    // Detecção de Duplo Toque no Mobile
+                    const now = Date.now();
+                    if (now - lastTouchTime < 320) {
+                        // Trata como Double Click
+                        const comodosAndar = state.comodos.filter(c => c.pavimentoId === state.pavimentoAtivoId);
+                        for (let c of comodosAndar) {
+                            const cw = c.largura * state.escala;
+                            const ch = c.comprimento * state.escala;
+                            if (mx >= c.x && mx <= c.x + cw && my >= c.y && my <= c.y + ch) {
+                                e.preventDefault();
+                                abrirModalAdicionarPontoRapido(c, mx, my);
+                                return;
+                            }
+                        }
+                    }
+                    lastTouchTime = now;
+
+                    // Dispara mousedown simulado
+                    const simulatedEvent = new MouseEvent('mousedown', {
+                        clientX: t.clientX,
+                        clientY: t.clientY,
+                        bubbles: true
+                    });
+                    canvas.dispatchEvent(simulatedEvent);
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    const t = e.touches[0];
+                    const simulatedEvent = new MouseEvent('mousemove', {
+                        clientX: t.clientX,
+                        clientY: t.clientY,
+                        bubbles: true
+                    });
+                    canvas.dispatchEvent(simulatedEvent);
+                    e.preventDefault(); // Impede o scroll indesejado durante arraste
+                }
+            }, { passive: false });
+
+            canvas.addEventListener('touchend', (e) => {
+                const simulatedEvent = new MouseEvent('mouseup', { bubbles: true });
+                canvas.dispatchEvent(simulatedEvent);
+            }, { passive: false });
+        }
+
+        // FUNÇÃO CENTRAL DE TROCA DE ABAS (DESKTOP & MOBILE BOTTOM NAV)
+        function trocarAba(tabTarget) {
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(b => {
+                if (b.getAttribute('data-tab') === tabTarget) {
+                    b.classList.add('border-amber-400', 'text-amber-400', 'bg-slate-900');
+                    b.classList.remove('border-transparent', 'text-slate-400');
+                } else {
+                    b.classList.remove('border-amber-400', 'text-amber-400', 'bg-slate-900');
+                    b.classList.add('border-transparent', 'text-slate-400');
+                }
+            });
+
+            const btnsMobile = document.querySelectorAll('.tab-btn-mobile');
+            btnsMobile.forEach(b => {
+                if (b.getAttribute('data-tab') === tabTarget) {
+                    b.classList.add('text-amber-400', 'border-t-2', 'border-amber-400', 'bg-slate-850');
+                    b.classList.remove('text-slate-400', 'border-transparent');
+                } else {
+                    b.classList.remove('text-amber-400', 'border-t-2', 'border-amber-400', 'bg-slate-850');
+                    b.classList.add('text-slate-400', 'border-transparent');
+                }
+            });
+
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            const targetEl = document.getElementById('tab-' + tabTarget);
+            if (targetEl) targetEl.classList.add('active');
+
+            if (tabTarget === 'planta') desenharCAD();
+            if (tabTarget === 'instalacoes') desenharInstalacoes();
+            if (tabTarget === 'visualizacao3d') {
+                onWindowResize3d();
+                reconstruirCena3D();
+            }
+            if (tabTarget === 'alimentador') renderizarQuadroDIN(state.circuitosCalculados);
+            if (tabTarget === 'duvidas') renderizarMemorialAba6();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function setupNavegacaoAbas() {
+            // Vincula touch nos canvases
+            vincularEventosTouchCanvas('cadCanvas', false);
+            vincularEventosTouchCanvas('instalacoesCanvas', true);
+    
             const btns = document.querySelectorAll('.tab-btn');
             btns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const tabTarget = btn.getAttribute('data-tab');
-                    btns.forEach(b => {
-                        b.classList.remove('border-amber-400', 'text-amber-400', 'bg-slate-900');
-                        b.classList.add('border-transparent', 'text-slate-400');
-                    });
-                    btn.classList.add('border-amber-400', 'text-amber-400', 'bg-slate-900');
-                    btn.classList.remove('border-transparent', 'text-slate-400');
-
-                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-                    const targetEl = document.getElementById('tab-' + tabTarget);
-                    if (targetEl) targetEl.classList.add('active');
-
-                    if (tabTarget === 'planta') desenharCAD();
-                    if (tabTarget === 'instalacoes') desenharInstalacoes();
-                    if (tabTarget === 'visualizacao3d') {
-                        onWindowResize3d();
-                        reconstruirCena3D();
-                    }
-                    if (tabTarget === 'alimentador') renderizarQuadroDIN(state.circuitosCalculados);
+                    trocarAba(tabTarget);
                 });
             });
         }
@@ -2650,6 +3505,11 @@
 
         function selecionarPavimento(pavId) {
             state.pavimentoAtivoId = pavId;
+            const pavAtualObj = state.pavimentos.find(p => p.id === pavId);
+            if (pavAtualObj) {
+                const lblMob = document.getElementById('lblNomePavimentoMobile');
+                if (lblMob) lblMob.textContent = pavAtualObj.nome.replace('Pavimento ', '');
+            }
             cancelarEdicao();
             limparSelecaoPonto();
             renderizarSeletorPavimentos();
@@ -3036,6 +3896,7 @@
                         <option value="porta" ${t.tipo === 'porta' ? 'selected' : ''}>🚪 Porta</option>
                         <option value="corredor" ${t.tipo === 'corredor' ? 'selected' : ''}>🚶 Corredor</option>
                         <option value="vao_livre" ${t.tipo === 'vao_livre' ? 'selected' : ''}>🔲 Vão Livre</option>
+                        <option value="parede" ${t.tipo === 'parede' ? 'selected' : ''}>🧱 Parede (Alvenaria)</option>
                     </select>
                 `;
                 container.appendChild(div);
@@ -3156,11 +4017,83 @@
             renderizarCargasFormulario();
         }
 
+        // ATUALIZAR MODO DO FORMULÁRIO (INSERIR VS EDITAR CÔMODO)
+        function atualizarModoFormulario(isEdicao) {
+            const titulo = document.getElementById('tituloModalComodo');
+            const badge = document.getElementById('badgeModalEdicao');
+            const btnSubmit = document.getElementById('btnSubmitComodo');
+            const pCad = document.getElementById('painelDimensionamentoCad');
+            const pMan = document.getElementById('painelDimensionamentoManual');
+
+            if (isEdicao) {
+                if (titulo) {
+                    const spans = titulo.getElementsByTagName('span');
+                    if (spans.length > 0) spans[0].textContent = 'Editar Cômodo';
+                }
+                if (badge) badge.classList.remove('hidden');
+                if (btnSubmit) btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Salvar Alterações';
+            } else {
+                if (titulo) {
+                    const spans = titulo.getElementsByTagName('span');
+                    if (spans.length > 0) spans[0].textContent = 'Inserir Cômodo';
+                }
+                if (badge) badge.classList.add('hidden');
+                if (btnSubmit) btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> Salvar Cômodo';
+            }
+
+            if (state.modoCalculo === 'manual') {
+                if (pCad) pCad.classList.add('hidden');
+                if (pMan) pMan.classList.remove('hidden');
+            } else {
+                if (pCad) pCad.classList.remove('hidden');
+                if (pMan) pMan.classList.add('hidden');
+            }
+        }
+
+        // INICIAR EDIÇÃO DE CÔMODO
+        function iniciarEdicaoComodo(id) {
+            const c = state.comodos.find(cmd => cmd.id === id);
+            if (!c) return;
+            state.comodoEmEdicaoId = c.id;
+
+            document.getElementById('txtNome').value = c.nome;
+            document.getElementById('selTipo').value = c.tipo;
+            document.getElementById('numLargura').value = c.largura;
+            document.getElementById('numComprimento').value = c.comprimento;
+            document.getElementById('numAreaManual').value = c.area.toFixed(1);
+            document.getElementById('numPerimManual').value = c.perimetro.toFixed(1);
+
+            const selPass = document.getElementById('selPassagemTomadasComodo');
+            if (selPass) selPass.value = c.passagemTomadas || 'horizontal';
+
+            const selPav = document.getElementById('selComodoPavimento');
+            if (selPav) {
+                selPav.innerHTML = '';
+                state.pavimentos.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.textContent = p.nome;
+                    if (p.id === c.pavimentoId) opt.selected = true;
+                    selPav.appendChild(opt);
+                });
+            }
+
+            state.cargasFormulario = c.cargas ? JSON.parse(JSON.stringify(c.cargas)) : [];
+            renderizarCargasFormulario();
+
+            atualizarModoFormulario(true);
+            const modal = document.getElementById('modalComodo');
+            if (modal) modal.classList.remove('hidden');
+        }
+
         function abrirModalNovoComodo() {
             state.comodoEmEdicaoId = null;
             limparCamposFormulario();
             state.cargasFormulario = [];
             renderizarCargasFormulario();
+
+            const selPass = document.getElementById('selPassagemTomadasComodo');
+            if (selPass) selPass.value = 'horizontal';
 
             // Popula seletor de pavimentos no modal
             const selPav = document.getElementById('selComodoPavimento');
@@ -3191,6 +4124,545 @@
             desenharCAD();
         }
 
+        
+        // =====================================================================
+        // POP-UP DE INSERÇÃO RÁPIDA NO DUPLO CLIQUE (TUG, TUE, LUZ, RETORNO)
+        // =====================================================================
+        let _pontoRapidoAlvo = { comodo: null, x: 0, y: 0 };
+
+        function abrirModalAdicionarPontoRapido(comodo, clickX, clickY) {
+            _pontoRapidoAlvo = { comodo, x: clickX, y: clickY };
+            const badge = document.getElementById('badgeComodoAlvoRapido');
+            if (badge) badge.textContent = comodo.nome;
+            const modal = document.getElementById('modalAdicionarPontoRapido');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function fecharModalAdicionarPontoRapido() {
+            const modal = document.getElementById('modalAdicionarPontoRapido');
+            if (modal) modal.classList.add('hidden');
+            _pontoRapidoAlvo = { comodo: null, x: 0, y: 0 };
+        }
+
+        function editarComodoAlvoRapido() {
+            const c = _pontoRapidoAlvo.comodo;
+            fecharModalAdicionarPontoRapido();
+            if (c) iniciarEdicaoComodo(c.id);
+        }
+
+        function inserirPontoRapido(tipo, pot, tensao, altura, nomeExtra) {
+            const c = _pontoRapidoAlvo.comodo;
+            if (!c) return;
+
+            const novoPonto = {
+                id: 'pt_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+                comodoId: c.id,
+                pavimentoId: c.pavimentoId || state.pavimentoAtivoId,
+                tipo: tipo,
+                nome: nomeExtra || `${tipo} ${c.nome}`,
+                pot: pot,
+                tensao: tensao,
+                altura: altura,
+                x: _pontoRapidoAlvo.x,
+                y: _pontoRapidoAlvo.y
+            };
+
+            state.pontosEletricos.push(novoPonto);
+            fecharModalAdicionarPontoRapido();
+
+            // Atualiza renders
+            atualizarTudo();
+            desenharCAD();
+            desenharInstalacoes();
+            reconstruirCena3D();
+
+            console.log("Ponto inserido com sucesso via duplo clique:", novoPonto);
+        }
+
+        // =====================================================================
+        // ALTERNÂNCIA RÁPIDA DE ROTEAMENTO DE TOMADAS (HORIZONTAL VS RADIAL)
+        // =====================================================================
+        function alternarPassagemTomadasComodo(comodoId = null) {
+            const comodosAndar = state.comodos.filter(c => c.pavimentoId === state.pavimentoAtivoId);
+            if (comodosAndar.length === 0) return;
+
+            let c = null;
+            if (comodoId) {
+                c = state.comodos.find(cmd => cmd.id === comodoId);
+            } else if (state.pontoSelecionadoId) {
+                const pt = state.pontosEletricos.find(p => p.id === state.pontoSelecionadoId);
+                if (pt) c = state.comodos.find(cmd => cmd.id === pt.comodoId);
+            }
+            if (!c) c = comodosAndar[0];
+
+            if (c) {
+                const atual = c.passagemTomadas || 'horizontal';
+                c.passagemTomadas = (atual === 'horizontal') ? 'radial' : 'horizontal';
+
+                const lbl = document.getElementById('lblStatusPassagemTomadaToolbar');
+                if (lbl) {
+                    lbl.textContent = (c.passagemTomadas === 'horizontal') ? 'Horizontal (Parede)' : 'Radial (Teto)';
+                }
+
+                desenharInstalacoes();
+                reconstruirCena3D();
+            }
+        }
+
+        // =====================================================================
+        // ABA 6: RENDERIZAÇÃO DO MEMORIAL TÉCNICO DE CIRCUITOS NBR 5410
+        // =====================================================================
+        function renderizarMemorialAba6() {
+            const tbody = document.getElementById('tabelaMemorialCircuitosAba6');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const comodos = state.comodos;
+            let circIdx = 1;
+
+            comodos.forEach(c => {
+                const pts = state.pontosEletricos.filter(p => p.comodoId === c.id);
+                const potIlum = pts.filter(p => p.tipo === 'ILUM').reduce((s, p) => s + (p.pot || 100), 0) || (100 + (c.area >= 6 ? Math.floor((c.area - 6) / 4) * 60 : 0));
+                const tugs = pts.filter(p => p.tipo === 'TUG');
+                const tues = pts.filter(p => p.tipo === 'TUE');
+
+                // 1. Circuito de Iluminação
+                const ibIlum = (potIlum / 127).toFixed(1);
+                const trIlum = document.createElement('tr');
+                trIlum.className = 'hover:bg-slate-900/60 transition';
+                trIlum.innerHTML = `
+                    <td class="p-2.5 font-bold text-amber-400 font-mono">C${circIdx++}</td>
+                    <td class="p-2.5 text-white font-medium">Iluminação ${c.nome}</td>
+                    <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">ILUM</span></td>
+                    <td class="p-2.5 font-mono text-slate-300">${potIlum} VA</td>
+                    <td class="p-2.5 font-mono text-slate-400">127 V</td>
+                    <td class="p-2.5 font-mono text-sky-400 font-bold">${ibIlum} A</td>
+                    <td class="p-2.5 font-mono text-slate-300">DJ 10A</td>
+                    <td class="p-2.5 font-mono font-bold text-amber-400">1,5 mm²</td>
+                    <td class="p-2.5 text-slate-400 text-[10px]">Item 6.2.6.1.1 (Tabela 47: Seção mínima regulamentar para iluminação). Capacidade 17,5A (B1).</td>
+                `;
+                tbody.appendChild(trIlum);
+
+                // 2. Circuito TUG
+                if (tugs.length > 0) {
+                    const potTug = tugs.reduce((s, p) => s + (p.pot || 100), 0);
+                    const ibTug = (potTug / 127).toFixed(1);
+                    const trTug = document.createElement('tr');
+                    trTug.className = 'hover:bg-slate-900/60 transition';
+                    trTug.innerHTML = `
+                        <td class="p-2.5 font-bold text-emerald-400 font-mono">C${circIdx++}</td>
+                        <td class="p-2.5 text-white font-medium">Tomadas TUG ${c.nome} (${tugs.length} pts)</td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">TUG</span></td>
+                        <td class="p-2.5 font-mono text-slate-300">${potTug} W</td>
+                        <td class="p-2.5 font-mono text-slate-400">127 V</td>
+                        <td class="p-2.5 font-mono text-sky-400 font-bold">${ibTug} A</td>
+                        <td class="p-2.5 font-mono text-slate-300">DJ 16A/20A</td>
+                        <td class="p-2.5 font-mono font-bold text-emerald-400">2,5 mm²</td>
+                        <td class="p-2.5 text-slate-400 text-[10px]">Tabela 47: Seção mínima de força/tomadas. Suporta 24A em Método B1 com proteção por disjuntor termomagnético.</td>
+                    `;
+                    tbody.appendChild(trTug);
+                }
+
+                // 3. Circuitos TUE
+                tues.forEach((tue, tIdx) => {
+                    const potTue = tue.pot || 1500;
+                    const vTue = tue.tensao || 220;
+                    const ibTue = (potTue / vTue).toFixed(1);
+                    let bitola = '2,5 mm²';
+                    let dj = 'DJ 16A';
+                    let just = 'Circuito independente (Item 9.5.3.1).';
+
+                    if (potTue >= 7000) {
+                        bitola = '10,0 mm²';
+                        dj = 'DJ 40A/50A';
+                        just = 'Alta potência: capacidade de corrente de 57A (Tabela 36 B1) para evitar sobreaquecimento.';
+                    } else if (potTue >= 4500) {
+                        bitola = '6,0 mm²';
+                        dj = 'DJ 32A';
+                        just = 'Chuveiro/Forno: Ib = 25A a 31A. Cabo de 6mm² suporta 41A (Método B1) assegurando queda de tensão < 2%.';
+                    } else if (potTue >= 3000) {
+                        bitola = '4,0 mm²';
+                        dj = 'DJ 25A';
+                        just = 'Carga média: cabo de 4mm² suporta 32A, compensando fator de agrupamento na prumada.';
+                    }
+
+                    const trTue = document.createElement('tr');
+                    trTue.className = 'hover:bg-slate-900/60 transition';
+                    trTue.innerHTML = `
+                        <td class="p-2.5 font-bold text-blue-400 font-mono">C${circIdx++}</td>
+                        <td class="p-2.5 text-white font-medium">${tue.nome} (${c.nome})</td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[9px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">TUE</span></td>
+                        <td class="p-2.5 font-mono text-slate-300">${potTue} W</td>
+                        <td class="p-2.5 font-mono text-slate-400">${vTue} V</td>
+                        <td class="p-2.5 font-mono text-sky-400 font-bold">${ibTue} A</td>
+                        <td class="p-2.5 font-mono text-slate-300">${dj}</td>
+                        <td class="p-2.5 font-mono font-bold text-blue-400">${bitola}</td>
+                        <td class="p-2.5 text-slate-400 text-[10px]">${just}</td>
+                    `;
+                    tbody.appendChild(trTue);
+                });
+            });
+        }
+
+        // =====================================================================
+        // CENTRAL DE IMPRESSÃO & EXPORTAÇÃO PDF DAS 6 FOLHAS DO PROJETO ABNT
+        // =====================================================================
+        function abrirModalImpressaoPDF() {
+            const modal = document.getElementById('modalImpressaoPDF');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function fecharModalImpressaoPDF() {
+            const modal = document.getElementById('modalImpressaoPDF');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function imprimirApenasFolhaAtual() {
+            fecharModalImpressaoPDF();
+            window.print();
+        }
+
+        function imprimirTodasFolhasProjeto() {
+            const modal = document.getElementById('modalImpressaoPDF');
+            if (modal) modal.classList.add('hidden');
+
+            const container = document.getElementById('containerPranchasImpressaoCompleta');
+            if (!container) {
+                window.print();
+                return;
+            }
+
+            const nomeObra = (document.getElementById('txtPdfNomeObra') && document.getElementById('txtPdfNomeObra').value) ? document.getElementById('txtPdfNomeObra').value : 'Projeto Elétrico Residencial NBR 5410';
+            const projetista = (document.getElementById('txtPdfProjetista') && document.getElementById('txtPdfProjetista').value) ? document.getElementById('txtPdfProjetista').value : 'Eng. Eletricista Responsável';
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+
+            // Captura imagens dos canvas ativos
+            const cadCanvas = document.getElementById('cadCanvas');
+            const instCanvas = document.getElementById('instalacoesCanvas');
+            const dataUrlCad = cadCanvas ? cadCanvas.toDataURL('image/png') : '';
+            const dataUrlInst = instCanvas ? instCanvas.toDataURL('image/png') : '';
+
+            let dataUrl3d = '';
+            if (state.renderer3d && state.renderer3d.domElement) {
+                try {
+                    dataUrl3d = state.renderer3d.domElement.toDataURL('image/png');
+                } catch(e) {
+                    console.log("3D snapshot catch:", e);
+                }
+            }
+
+            const totalPot = state.comodos.reduce((s, c) => s + (c.area * 30), 0) + state.pontosEletricos.reduce((s, p) => s + (p.pot || 0), 0);
+
+            // GERA AS 6 PRANCHAS ABNT
+            container.innerHTML = `
+                <!-- ==================== FOLHA 01: PLANTA BAIXA ARQUITETÔNICA CAD 2D ==================== -->
+                <div class="folha-prancha-abnt">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a;">PRO-ELÉTRICA CAD NBR 5410</h1>
+                            <p style="font-size: 9pt; margin: 0; color: #475569;">PRANCHA 01/06 — PLANTA BAIXA ARQUITETÔNICA & AMBIENTES</p>
+                        </div>
+                        <div style="text-align: right; font-size: 8pt; font-family: monospace;">
+                            <span>ESCALA: 1:50</span> • <span>SISTEMA: CAD 2D VETORIAL</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin: 15px 0;">
+                        ${dataUrlCad ? `<img src="${dataUrlCad}" style="max-width: 100%; max-height: 520px; margin: 0 auto; border: 1px solid #cbd5e1; border-radius: 4px;" />` : '<p>Planta Baixa CAD</p>'}
+                    </div>
+
+                    <!-- CARIMBO TÉCNICO ABNT -->
+                    <div class="carimbo-tecnico" style="margin-top: 15px; padding: 10px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; font-size: 8pt;">
+                        <div><strong>OBRA:</strong> ${nomeObra}</div>
+                        <div><strong>RESP. TÉCNICO:</strong> ${projetista}</div>
+                        <div><strong>DATA:</strong> ${dataHoje}</div>
+                        <div><strong>FOLHA:</strong> 01 / 06</div>
+                    </div>
+                </div>
+
+                <!-- ==================== FOLHA 02: PROJETO ELÉTRICO 2D & ELETRODUTOS ==================== -->
+                <div class="folha-prancha-abnt">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a;">PRO-ELÉTRICA CAD NBR 5410</h1>
+                            <p style="font-size: 9pt; margin: 0; color: #059669;">PRANCHA 02/06 — INSTALAÇÕES ELÉTRICAS: TUG, TUE, ILUMINAÇÃO & ELETRODUTOS</p>
+                        </div>
+                        <div style="text-align: right; font-size: 8pt; font-family: monospace;">
+                            <span>ROTEAMENTO: NBR 5410 / NBR 5444</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin: 10px 0;">
+                        ${dataUrlInst ? `<img src="${dataUrlInst}" style="max-width: 100%; max-height: 480px; margin: 0 auto; border: 1px solid #cbd5e1; border-radius: 4px;" />` : '<p>Planta Elétrica</p>'}
+                    </div>
+
+                    <div style="display: flex; gap: 15px; font-size: 8pt; background: #f1f5f9; padding: 6px; border-radius: 4px; margin-top: 6px;">
+                        <span><strong>LEGENDA:</strong></span>
+                        <span style="color: #059669;">● TUG (#10b981)</span>
+                        <span style="color: #2563eb;">■ TUE (#3b82f6)</span>
+                        <span style="color: #d97706;">💡 Iluminação (#f59e0b)</span>
+                        <span style="color: #7c3aed;">〰 Retorno (#a855f7)</span>
+                        <span style="color: #0284c7;">-- Eletroduto Teto</span>
+                        <span style="color: #ea580c;">-·- Eletroduto Chão / Mesclado</span>
+                    </div>
+
+                    <div class="carimbo-tecnico" style="margin-top: 10px; padding: 10px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; font-size: 8pt;">
+                        <div><strong>OBRA:</strong> ${nomeObra}</div>
+                        <div><strong>RESP. TÉCNICO:</strong> ${projetista}</div>
+                        <div><strong>DATA:</strong> ${dataHoje}</div>
+                        <div><strong>FOLHA:</strong> 02 / 06</div>
+                    </div>
+                </div>
+
+                <!-- ==================== FOLHA 03: MAQUETE 3D BIM & PRUMADAS VERTICAIS ==================== -->
+                <div class="folha-prancha-abnt">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a;">PRO-ELÉTRICA CAD NBR 5410</h1>
+                            <p style="font-size: 9pt; margin: 0; color: #2563eb;">PRANCHA 03/06 — MODELO 3D BIM, ISOMÉTRICO & PRUMADAS VERTICAIS</p>
+                        </div>
+                        <div style="text-align: right; font-size: 8pt; font-family: monospace;">
+                            <span>WEBGL RENDERER</span> • <span>COORDINATES Z/Y EXACT</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center; margin: 15px 0;">
+                        ${dataUrl3d ? `<img src="${dataUrl3d}" style="max-width: 100%; max-height: 520px; margin: 0 auto; border: 1px solid #cbd5e1; border-radius: 4px;" />` : '<p style="padding: 40px; background: #f1f5f9; border-radius: 8px;">Visualização Tridimensional BIM Renderizada</p>'}
+                    </div>
+
+                    <div class="carimbo-tecnico" style="margin-top: 15px; padding: 10px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; font-size: 8pt;">
+                        <div><strong>OBRA:</strong> ${nomeObra}</div>
+                        <div><strong>RESP. TÉCNICO:</strong> ${projetista}</div>
+                        <div><strong>DATA:</strong> ${dataHoje}</div>
+                        <div><strong>FOLHA:</strong> 03 / 06</div>
+                    </div>
+                </div>
+
+                <!-- ==================== FOLHA 04: QUADRO DE DISTRIBUIÇÃO & DISJUNTORES ==================== -->
+                <div class="folha-prancha-abnt">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a;">PRO-ELÉTRICA CAD NBR 5410</h1>
+                            <p style="font-size: 9pt; margin: 0; color: #d97706;">PRANCHA 04/06 — QUADRO DE CARGAS & DIAGRAMA DE DISJUNTORES (QDT DIN)</p>
+                        </div>
+                        <div style="text-align: right; font-size: 8pt; font-family: monospace;">
+                            <span>POTÊNCIA TOTAL: ${(totalPot/1000).toFixed(1)} kVA</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 15px 0; overflow-x: auto;">
+                        <table style="width: 100%; font-size: 8pt; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="background: #0f172a; color: #ffffff;">
+                                    <th style="padding: 6px; border: 1px solid #334155;">Circ.</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Descrição</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Tipo</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Potência</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Tensão</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Ib (A)</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Disjuntor</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Bitola</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Proteção DR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${gerarLinhasTabelaPdfCircuitos()}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="carimbo-tecnico" style="margin-top: 15px; padding: 10px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; font-size: 8pt;">
+                        <div><strong>OBRA:</strong> ${nomeObra}</div>
+                        <div><strong>RESP. TÉCNICO:</strong> ${projetista}</div>
+                        <div><strong>DATA:</strong> ${dataHoje}</div>
+                        <div><strong>FOLHA:</strong> 04 / 06</div>
+                    </div>
+                </div>
+
+                <!-- ==================== FOLHA 05: LISTA QUANTITATIVA DE MATERIAIS ==================== -->
+                <div class="folha-prancha-abnt">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a;">PRO-ELÉTRICA CAD NBR 5410</h1>
+                            <p style="font-size: 9pt; margin: 0; color: #7c3aed;">PRANCHA 05/06 — MEMORIAL QUANTITATIVO DE MATERIAIS & COMPONENTES</p>
+                        </div>
+                        <div style="text-align: right; font-size: 8pt; font-family: monospace;">
+                            <span>LISTA DE COMPRAS & ORÇAMENTO</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 15px 0; overflow-x: auto;">
+                        <table style="width: 100%; font-size: 8pt; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="background: #0f172a; color: #ffffff;">
+                                    <th style="padding: 6px; border: 1px solid #334155;">Categoria</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Descrição do Material</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Especificação Técnica</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Quantidade</th>
+                                    <th style="padding: 6px; border: 1px solid #334155;">Unidade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${gerarLinhasTabelaPdfMateriais()}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="carimbo-tecnico" style="margin-top: 15px; padding: 10px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; font-size: 8pt;">
+                        <div><strong>OBRA:</strong> ${nomeObra}</div>
+                        <div><strong>RESP. TÉCNICO:</strong> ${projetista}</div>
+                        <div><strong>DATA:</strong> ${dataHoje}</div>
+                        <div><strong>FOLHA:</strong> 05 / 06</div>
+                    </div>
+                </div>
+
+                <!-- ==================== FOLHA 06: MEMORIAL DE CÁLCULO & JUSTIFICATIVAS NBR 5410 ==================== -->
+                <div class="folha-prancha-abnt">
+                    <div style="border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="font-size: 16pt; font-weight: 900; margin: 0; color: #0f172a;">PRO-ELÉTRICA CAD NBR 5410</h1>
+                            <p style="font-size: 9pt; margin: 0; color: #be123c;">PRANCHA 06/06 — MEMORIAL DE CÁLCULO & JUSTIFICATIVA TÉCNICA DAS BITOLAS</p>
+                        </div>
+                        <div style="text-align: right; font-size: 8pt; font-family: monospace;">
+                            <span>CONFORMIDADE LEGAL ABNT NBR 5410</span>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 8pt; line-height: 1.5; color: #1e293b; space-y-2;">
+                        <h4 style="font-size: 9pt; font-weight: bold; margin: 8px 0 4px 0; color: #0f172a;">1. JUSTIFICATIVA TÉCNICA DAS BITOLAS ADOTADAS</h4>
+                        <p style="margin: 0 0 6px 0;">
+                            • <strong>1,5 mm² (Iluminação)</strong>: Adotado estritamente por exigência da <em>Tabela 47 do item 6.2.6.1.1 da NBR 5410</em> (seção mínima admissível em cobre). Capacidade de 17,5A (Método B1, 70°C), protegido por disjuntor de 10A.<br>
+                            • <strong>2,5 mm² (Tomadas TUG)</strong>: Seção mínima obrigatória pela <em>Tabela 47</em> para circuitos de força e tomadas. Capacidade de 24A (B1), coordenada com disjuntor de 16A/20A.<br>
+                            • <strong>4,0 mm² (Cargas Médias e Áreas Molhadas)</strong>: Capacidade de condução de 32A (Tabela 36, Método B1). Com aplicação de FCA de 0,70 para prumadas agrupadas, assegura proteção térmica sem risco com disjuntor de 25A.<br>
+                            • <strong>6,0 mm² (Chuveiros 5500W a 6800W em 220V)</strong>: Corrente de projeto de 25A a 30,9A. O cabo de 6 mm² suporta 41A, garantindo limite de queda de tensão inferior a 2% e margem contra sobrecarga com disjuntor de 32A.<br>
+                            • <strong>10,0 mm² (Chuveiros 7500W+ / Prumada de Sub-Quadro)</strong>: Corrente contínua de 34,1A. O cabo de 10 mm² suporta 57A (Método B1), protegido por disjuntor de 40A ou 50A.<br>
+                            • <strong>16,0 a 25,0 mm² (Alimentador Principal)</strong>: Calculado pela demanda total com fator de simultaneidade NBR 5410.
+                        </p>
+
+                        <h4 style="font-size: 9pt; font-weight: bold; margin: 8px 0 4px 0; color: #0f172a;">2. PADRÃO OBRIGATÓRIO DE CORES DOS CONDUTORES (ITEM 6.1.5.3)</h4>
+                        <p style="margin: 0 0 6px 0;">
+                            • <strong>Neutro</strong>: Azul-Claro exclusivo.<br>
+                            • <strong>Proteção (Terra)</strong>: Verde ou Verde-Amarelo exclusivo.<br>
+                            • <strong>Fase</strong>: Preto, Vermelho, Marrom, Branco ou Cinza.<br>
+                            • <strong>Retorno de Lâmpada</strong>: Amarelo (distinto de neutro e terra).
+                        </p>
+
+                        <h4 style="font-size: 9pt; font-weight: bold; margin: 8px 0 4px 0; color: #0f172a;">3. OCUPAÇÃO DE ELETRODUTOS & PROTEÇÃO DR</h4>
+                        <p style="margin: 0 0 6px 0;">
+                            • <strong>Taxa de Ocupação (Item 6.2.11)</strong>: Máximo de 40% para 3 ou mais condutores no mesmo duto flexível.<br>
+                            • <strong>Dispositivo DR 30mA (Item 5.1.3.2)</strong>: Obrigatório em todos os circuitos de áreas molhadas e tomadas externas.
+                        </p>
+                    </div>
+
+                    <div class="carimbo-tecnico" style="margin-top: 15px; padding: 10px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; font-size: 8pt;">
+                        <div><strong>OBRA:</strong> ${nomeObra}</div>
+                        <div><strong>RESP. TÉCNICO:</strong> ${projetista}</div>
+                        <div><strong>DATA:</strong> ${dataHoje}</div>
+                        <div><strong>FOLHA:</strong> 06 / 06</div>
+                    </div>
+                </div>
+            `;
+
+            // Executa a impressão
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        function gerarLinhasTabelaPdfCircuitos() {
+            let html = '';
+            let idx = 1;
+            state.comodos.forEach(c => {
+                const pts = state.pontosEletricos.filter(p => p.comodoId === c.id);
+                const potIlum = pts.filter(p => p.tipo === 'ILUM').reduce((s, p) => s + (p.pot || 100), 0) || (100 + (c.area >= 6 ? Math.floor((c.area - 6) / 4) * 60 : 0));
+                const tugs = pts.filter(p => p.tipo === 'TUG');
+                const tues = pts.filter(p => p.tipo === 'TUE');
+
+                html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 5px; font-weight: bold;">C${idx++}</td>
+                    <td style="padding: 5px;">Iluminação ${c.nome}</td>
+                    <td style="padding: 5px;">ILUM</td>
+                    <td style="padding: 5px;">${potIlum} VA</td>
+                    <td style="padding: 5px;">127 V</td>
+                    <td style="padding: 5px;">${(potIlum/127).toFixed(1)} A</td>
+                    <td style="padding: 5px;">DJ 10A</td>
+                    <td style="padding: 5px; font-weight: bold;">1,5 mm²</td>
+                    <td style="padding: 5px; color: #059669;">Dispensado / Opcional</td>
+                </tr>`;
+
+                if (tugs.length > 0) {
+                    const potTug = tugs.reduce((s, p) => s + (p.pot || 100), 0);
+                    html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 5px; font-weight: bold;">C${idx++}</td>
+                        <td style="padding: 5px;">Tomadas TUG ${c.nome}</td>
+                        <td style="padding: 5px;">TUG</td>
+                        <td style="padding: 5px;">${potTug} W</td>
+                        <td style="padding: 5px;">127 V</td>
+                        <td style="padding: 5px;">${(potTug/127).toFixed(1)} A</td>
+                        <td style="padding: 5px;">DJ 16A/20A</td>
+                        <td style="padding: 5px; font-weight: bold;">2,5 mm²</td>
+                        <td style="padding: 5px; color: #dc2626; font-weight: bold;">DR 30mA Obrigatório</td>
+                    </tr>`;
+                }
+
+                tues.forEach(tue => {
+                    const potTue = tue.pot || 1500;
+                    const vTue = tue.tensao || 220;
+                    let bit = '2,5 mm²';
+                    let dj = 'DJ 16A';
+                    if (potTue >= 7000) { bit = '10,0 mm²'; dj = 'DJ 50A'; }
+                    else if (potTue >= 4500) { bit = '6,0 mm²'; dj = 'DJ 32A'; }
+                    else if (potTue >= 3000) { bit = '4,0 mm²'; dj = 'DJ 25A'; }
+
+                    html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                        <td style="padding: 5px; font-weight: bold;">C${idx++}</td>
+                        <td style="padding: 5px;">${tue.nome} (${c.nome})</td>
+                        <td style="padding: 5px;">TUE</td>
+                        <td style="padding: 5px;">${potTue} W</td>
+                        <td style="padding: 5px;">${vTue} V</td>
+                        <td style="padding: 5px;">${(potTue/vTue).toFixed(1)} A</td>
+                        <td style="padding: 5px;">${dj}</td>
+                        <td style="padding: 5px; font-weight: bold;">${bit}</td>
+                        <td style="padding: 5px; color: #dc2626; font-weight: bold;">DR 30mA Obrigatório</td>
+                    </tr>`;
+                });
+            });
+            return html;
+        }
+
+        function gerarLinhasTabelaPdfMateriais() {
+            let html = '';
+            const itens = [
+                ['Condutores', 'Cabo Flexível de Cobre 750V 1,5 mm²', 'Isolação PVC 70°C Amarelo/Azul (Iluminação)', '150', 'metros'],
+                ['Condutores', 'Cabo Flexível de Cobre 750V 2,5 mm²', 'Isolação PVC 70°C Vermelho/Azul/Verde (TUG)', '280', 'metros'],
+                ['Condutores', 'Cabo Flexível de Cobre 750V 6,0 mm²', 'Isolação PVC 70°C Vermelho/Azul/Verde (Chuveiro)', '65', 'metros'],
+                ['Condutores', 'Cabo Flexível de Cobre 750V 10,0 mm²', 'Prumada Vertical e Alimentador Secundário', '40', 'metros'],
+                ['Tubulação', 'Eletroduto Flexível Corrugado 3/4" (25mm)', 'Anti-chamas PVC Amarelo/Laranja', '180', 'metros'],
+                ['Tubulação', 'Eletroduto Flexível Reforçado 1" (32mm)', 'Para Prumada Shaft e Alimentador Geral', '45', 'metros'],
+                ['Caixas', 'Caixa de Embutir 4x2" Termoplástica', 'Para tomadas e interruptores de parede', '32', 'unidades'],
+                ['Caixas', 'Caixa Octogonal de Teto 4x4"', 'Para fixação de luminárias e passagem', '14', 'unidades'],
+                ['Aparelhagem', 'Tomada 2P+T 10A / 250V (NBR 14136)', 'Módulos brancos com espelho', '24', 'unidades'],
+                ['Aparelhagem', 'Tomada 2P+T 20A / 250V (NBR 14136)', 'Para cozinha, área de serviço e TUEs', '8', 'unidades'],
+                ['Aparelhagem', 'Interruptores Simples e Three-Way', 'Com placas e parafusos de fixação', '12', 'unidades'],
+                ['Proteção', 'Quadro de Distribuição de Embutir (QDT)', 'Barramento Bifásico/Trifásico DIN', '2', 'unidades'],
+                ['Proteção', 'Disjuntores Termomagnéticos DIN', 'Curva C (10A, 16A, 20A, 32A, 50A)', '18', 'unidades'],
+                ['Proteção', 'Interruptor Diferencial Residual (IDR)', 'Tetrapolar / Bipolar 40A / 30mA Sensibilidade', '2', 'unidades'],
+                ['Proteção', 'Dispositivo de Proteção contra Surtos (DPS)', 'Classe II 20kA/275V com sinalizador', '4', 'unidades']
+            ];
+
+            itens.forEach(it => {
+                html += `<tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 5px; font-weight: bold;">${it[0]}</td>
+                    <td style="padding: 5px;">${it[1]}</td>
+                    <td style="padding: 5px; color: #475569;">${it[2]}</td>
+                    <td style="padding: 5px; font-weight: bold; text-align: right;">${it[3]}</td>
+                    <td style="padding: 5px;">${it[4]}</td>
+                </tr>`;
+            });
+            return html;
+        }
+    
+
         function setupFormulario() {
             const form = document.getElementById('formComodo');
             if (!form) return;
@@ -3218,6 +4690,9 @@
 
                 const cargasSalvar = JSON.parse(JSON.stringify(state.cargasFormulario));
 
+                const selPassagem = document.getElementById('selPassagemTomadasComodo');
+                const passagemTomadas = selPassagem ? selPassagem.value : 'horizontal';
+
                 if (state.comodoEmEdicaoId !== null) {
                     const idx = state.comodos.findIndex(c => c.id === state.comodoEmEdicaoId);
                     if (idx !== -1) {
@@ -3229,6 +4704,7 @@
                         state.comodos[idx].area = area;
                         state.comodos[idx].perimetro = perimetro;
                         state.comodos[idx].cargas = cargasSalvar;
+                        state.comodos[idx].passagemTomadas = passagemTomadas;
                     }
                     fecharModalComodo();
                 } else {
@@ -3248,7 +4724,8 @@
                         perimetro,
                         x: novox,
                         y: novoy,
-                        cargas: cargasSalvar
+                        cargas: cargasSalvar,
+                        passagemTomadas: passagemTomadas
                     };
                     state.comodos.push(novoComodo);
                     gerarPontosEletricosParaComodo(novoComodo);
@@ -3563,7 +5040,8 @@
                     const cw = c.largura * state.escala;
                     const ch = c.comprimento * state.escala;
                     if (mx >= c.x && mx <= c.x + cw && my >= c.y && my <= c.y + ch) {
-                        iniciarEdicaoComodo(c.id);
+                        // Abre pop-up para adição rápida de ponto elétrico ou edição
+                        abrirModalAdicionarPontoRapido(c, mx, my);
                         return;
                     }
                 }
@@ -3938,11 +5416,23 @@
                 const mx = (e.clientX - rect.left) * scaleX;
                 const my = (e.clientY - rect.top) * scaleY;
 
+                // 1. Verifica se clicou diretamente sobre um ponto existente
                 const pontosAndar = state.pontosEletricos.filter(p => p.pavimentoId === state.pavimentoAtivoId);
                 for (let pt of pontosAndar) {
                     const dist = Math.sqrt(Math.pow(mx - pt.x, 2) + Math.pow(my - pt.y, 2));
                     if (dist <= 16) {
                         abrirModalPontoEdicao(pt);
+                        return;
+                    }
+                }
+
+                // 2. Se clicou dentro de um cômodo, abre pop-up para adicionar novo ponto
+                const comodosAndar = state.comodos.filter(c => c.pavimentoId === state.pavimentoAtivoId);
+                for (let c of comodosAndar) {
+                    const cw = c.largura * state.escala;
+                    const ch = c.comprimento * state.escala;
+                    if (mx >= c.x && mx <= c.x + cw && my >= c.y && my <= c.y + ch) {
+                        abrirModalAdicionarPontoRapido(c, mx, my);
                         return;
                     }
                 }
@@ -4134,6 +5624,7 @@
         }
 
         function atualizarTudo() {
+            renderizarMemorialAba6();
             renderListaComodosSidebar();
             desenharCAD();
             desenharInstalacoes();
@@ -5431,7 +6922,11 @@
 
             desenharTransicoes(ctx);
 
-            // Eletrodutos dos circuitos com curvas
+            // 1. INFRAESTRUTURA PRINCIPAL (ELETRODUTOS QDT -> CÔMODOS)
+            const pavAtivoObj = state.pavimentos.find(p => p.id === state.pavimentoAtivoId);
+            const ehPassagemChao = (pavAtivoObj && pavAtivoObj.tipoPassagemCabos === 'chao');
+            const ehMultiPavMesclado = (ehPassagemChao && state.pavimentos.length > 1);
+
             comodosAndar.forEach((c, idx) => {
                 const luzX = c.x + (c.largura * state.escala) / 2;
                 const luzY = c.y + (c.comprimento * state.escala) / 2;
@@ -5440,9 +6935,19 @@
                 const wps = state.eletrodutoWaypoints[circNum] || [];
                 const pontosRota = [{ x: qdtCx, y: qdtCy }, ...wps, { x: luzX, y: luzY }];
 
-                ctx.strokeStyle = '#38bdf8';
-                ctx.lineWidth = 2.5;
-                ctx.setLineDash([5, 3]);
+                // COR DA INFRAESTRUTURA:
+                // Teto: Azul Celeste (#38bdf8) tracejado NBR
+                // Chão: Laranja (#f97316) traço-ponto NBR (com indicação de infraestrutura mesclada no contrapiso)
+                if (ehPassagemChao) {
+                    ctx.strokeStyle = '#f97316';
+                    ctx.lineWidth = 3.0;
+                    ctx.setLineDash([8, 4, 2, 4]); // Traço-ponto regulamentar NBR 5444 para piso
+                } else {
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([6, 3]); // Tracejado para teto
+                }
+
                 ctx.beginPath();
                 ctx.moveTo(pontosRota[0].x, pontosRota[0].y);
                 for (let i = 1; i < pontosRota.length; i++) {
@@ -5451,11 +6956,18 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
+                if (ehMultiPavMesclado && idx === 0) {
+                    // Indicação de Infraestrutura Mesclada
+                    ctx.fillStyle = '#ea580c';
+                    ctx.font = 'bold 9px monospace';
+                    ctx.fillText('⚡ INFRA MESCLADA (PISO)', (qdtCx + luzX) / 2, (qdtCy + luzY) / 2 - 8);
+                }
+
                 if (state.ferramentaInstalacoes === 'curvas_eletroduto') {
                     wps.forEach(wp => {
                         ctx.beginPath();
                         ctx.arc(wp.x, wp.y, 6.5, 0, 2 * Math.PI);
-                        ctx.fillStyle = '#38bdf8';
+                        ctx.fillStyle = ehPassagemChao ? '#f97316' : '#38bdf8';
                         ctx.fill();
                         ctx.strokeStyle = '#ffffff';
                         ctx.lineWidth = 2;
@@ -5463,11 +6975,107 @@
                     });
                 }
 
+                // 2. FIAÇÃO INTERNA DO CÔMODO COM CORES DISTINTAS POR CIRCUITO:
+                // • TUG: Verde Esmeralda (#10b981) - Horizontal na parede ou radial
+                // • TUE: Azul Royal (#3b82f6) - Individual
+                // • Lâmpadas: Amarelo Ouro (#f59e0b)
+                // • Retorno: Roxo / Violeta (#a855f7)
                 const ptsDoComodo = state.pontosEletricos.filter(pt => pt.comodoId === c.id);
-                ptsDoComodo.forEach(pt => {
-                    ctx.strokeStyle = pt.tipo === 'TUE' ? '#60a5fa' : '#34d399';
-                    ctx.lineWidth = 1.2;
-                    ctx.setLineDash([3, 2]);
+                const tugsDoComodo = ptsDoComodo.filter(pt => pt.tipo === 'TUG');
+                const tuesDoComodo = ptsDoComodo.filter(pt => pt.tipo === 'TUE');
+                const interrDoComodo = ptsDoComodo.filter(pt => pt.tipo === 'INTERRUPTOR');
+                const ilumExtras = ptsDoComodo.filter(pt => pt.tipo === 'ILUM' && (Math.abs(pt.x - luzX) > 10 || Math.abs(pt.y - luzY) > 10));
+
+                const ehRoteamentoHorizontal = (c.passagemTomadas === 'horizontal' || (!c.passagemTomadas && tugsDoComodo.length > 1));
+
+                // A) TOMADAS TUG:
+                if (ehRoteamentoHorizontal && tugsDoComodo.length > 1) {
+                    // ROTEAMENTO HORIZONTAL NA PAREDE (ENCADEAMENTO TOMADA A TOMADA)
+                    // Ordena tomadas para um traçado limpo
+                    const tugsOrdenadas = [...tugsDoComodo].sort((a, b) => (a.x + a.y) - (b.x + b.y));
+
+                    // 1ª tomada conecta à alimentação (descida do teto ou piso)
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 2.0;
+                    ctx.setLineDash([4, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(luzX, luzY);
+                    ctx.lineTo(tugsOrdenadas[0].x, tugsOrdenadas[0].y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Encadeamento horizontal contínuo pelas paredes
+                    ctx.strokeStyle = '#10b981';
+                    ctx.lineWidth = 2.6;
+                    for (let t = 0; t < tugsOrdenadas.length - 1; t++) {
+                        const pt1 = tugsOrdenadas[t];
+                        const pt2 = tugsOrdenadas[t + 1];
+
+                        ctx.beginPath();
+                        ctx.moveTo(pt1.x, pt1.y);
+                        // Se estão em paredes opostas, acompanha o contorno da parede
+                        if (Math.abs(pt1.x - pt2.x) > 30 && Math.abs(pt1.y - pt2.y) > 30) {
+                            ctx.lineTo(pt2.x, pt1.y);
+                            ctx.lineTo(pt2.x, pt2.y);
+                        } else {
+                            ctx.lineTo(pt2.x, pt2.y);
+                        }
+                        ctx.stroke();
+
+                        // Marcador de rota horizontal
+                        ctx.fillStyle = '#10b981';
+                        ctx.beginPath();
+                        ctx.arc((pt1.x + pt2.x) / 2, (pt1.y + pt2.y) / 2, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                } else {
+                    // ROTEAMENTO RADIAL: Cada tomada sobe individualmente
+                    tugsDoComodo.forEach(pt => {
+                        ctx.strokeStyle = '#10b981'; // VERDE TUG
+                        ctx.lineWidth = 1.8;
+                        ctx.setLineDash([4, 3]);
+                        ctx.beginPath();
+                        ctx.moveTo(luzX, luzY);
+                        ctx.lineTo(pt.x, pt.y);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    });
+                }
+
+                // B) TOMADAS TUE: LINHAS DEDICADAS EM AZUL ROYAL (#3b82f6)
+                tuesDoComodo.forEach(pt => {
+                    ctx.strokeStyle = '#3b82f6'; // AZUL TUE
+                    ctx.lineWidth = 2.2;
+                    ctx.setLineDash([6, 2]);
+                    ctx.beginPath();
+                    ctx.moveTo(luzX, luzY);
+                    ctx.lineTo(pt.x, pt.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                });
+
+                // C) INTERRUPTOR & RETORNO DE LÂMPADA: ROXO / VIOLETA (#a855f7)
+                interrDoComodo.forEach(pt => {
+                    ctx.strokeStyle = '#a855f7'; // ROXO RETORNO
+                    ctx.lineWidth = 2.0;
+                    ctx.beginPath();
+                    ctx.moveTo(pt.x, pt.y);
+                    ctx.lineTo(luzX, luzY);
+                    ctx.stroke();
+
+                    // Símbolo gráfico de condutor de retorno NBR 5444 (meio traço perpendicular)
+                    const midX = (pt.x + luzX) / 2;
+                    const midY = (pt.y + luzY) / 2;
+                    ctx.fillStyle = '#c084fc';
+                    ctx.font = 'bold 8px sans-serif';
+                    ctx.fillText('retorno', midX + 3, midY - 3);
+                });
+
+                // D) LÂMPADAS ADICIONAIS: AMARELO OURO (#f59e0b)
+                ilumExtras.forEach(pt => {
+                    ctx.strokeStyle = '#f59e0b'; // AMARELO ILUM
+                    ctx.lineWidth = 2.2;
+                    ctx.setLineDash([4, 2]);
                     ctx.beginPath();
                     ctx.moveTo(luzX, luzY);
                     ctx.lineTo(pt.x, pt.y);
@@ -5589,7 +7197,8 @@
 
                 ctx.restore();
 
-                ctx.fillStyle = isTue ? '#93c5fd' : '#a7f3d0';
+                const ehTue = (pt.tipo === 'TUE');
+                ctx.fillStyle = ehTue ? '#93c5fd' : '#a7f3d0';
                 ctx.font = 'bold 9px sans-serif';
                 ctx.fillText(pt.nome, pt.x + 10, pt.y - 2);
 
@@ -5707,6 +7316,38 @@
                     ctx.font = 'bold 8px sans-serif';
                     ctx.fillText('VÃO LIVRE', -20, 10);
                     ctx.restore();
+
+                } else if (t.tipo === 'parede') {
+                    // ILUSTRAÇÃO TÉCNICA DE PAREDE DE ALVENARIA (NBR 6492)
+                    ctx.save();
+                    ctx.translate(tx, ty);
+                    if (t.orientacao === 'V') ctx.rotate(Math.PI / 2);
+
+                    // Fundo da alvenaria em corte
+                    ctx.fillStyle = '#334155';
+                    ctx.fillRect(-22, -6, 44, 12);
+
+                    // Contorno
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(-22, -6, 44, 12);
+
+                    // Hachura técnica de corte de tijolo/alvenaria (linhas diagonais ///)
+                    ctx.strokeStyle = '#cbd5e1';
+                    ctx.lineWidth = 1.0;
+                    for (let hx = -20; hx <= 20; hx += 7) {
+                        ctx.beginPath();
+                        ctx.moveTo(hx - 4, 6);
+                        ctx.lineTo(hx + 4, -6);
+                        ctx.stroke();
+                    }
+
+                    // Rótulo técnico
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.font = 'bold 8px monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('🧱 PAREDE', 0, 17);
+                    ctx.restore();
                 }
             });
         }
@@ -5727,7 +7368,7 @@
             state.camera3d = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
             state.camera3d.position.set(16, 18, 22);
 
-            state.renderer3d = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+            state.renderer3d = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
             state.renderer3d.setSize(w, h);
             state.renderer3d.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             state.renderer3d.shadowMap.enabled = true;
@@ -6528,6 +8169,34 @@
                 meshPrumada.userData = { elementoTipo: 'prumada' };
                 state.meshGroup3d.add(meshPrumada);
             }
+
+            // 3. TRANSIÇÕES 3D (PAREDES DE ALVENARIA, PORTAS, ETC.)
+            state.transicoes.forEach(t => {
+                const pav = state.pavimentos.find(p => p.id === t.pavimentoId);
+                if (!pav) return;
+                const pIdx = state.pavimentos.indexOf(pav);
+                const nivelY = pIdx * 3.0 + (state.explodido3d ? pIdx * 1.8 : 0);
+                const peDir = pav.alturaPeDireito || 2.8;
+
+                const tx = t.x * escala3D;
+                const tz = t.y * escala3D;
+
+                if (t.tipo === 'parede') {
+                    const geoP = new THREE.BoxGeometry(t.orientacao === 'V' ? 0.18 : 1.6, peDir, t.orientacao === 'V' ? 1.6 : 0.18);
+                    const matP = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.85 });
+                    const meshP = new THREE.Mesh(geoP, matP);
+                    meshP.position.set(tx, nivelY + peDir / 2, tz);
+                    meshP.userData = { tipo: 'parede_divisoria', transicaoRef: t };
+                    state.meshGroup3d.add(meshP);
+                } else if (t.tipo === 'porta') {
+                    const geoPorta = new THREE.BoxGeometry(t.orientacao === 'V' ? 0.08 : 0.9, 2.1, t.orientacao === 'V' ? 0.9 : 0.08);
+                    const matPorta = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.6 });
+                    const meshPorta = new THREE.Mesh(geoPorta, matPorta);
+                    meshPorta.position.set(tx, nivelY + 1.05, tz);
+                    meshPorta.userData = { tipo: 'porta_3d', transicaoRef: t };
+                    state.meshGroup3d.add(meshPorta);
+                }
+            });
         }
 
         // CÁLCULOS TÉCNICOS CONSOLIDADOS (CONFORME NBR 5410 & REGIME DE IMÓVEIS)
@@ -7553,5 +9222,147 @@
         <span id="toastIcone" class="text-emerald-400 text-base"><i class="fa-solid fa-circle-check"></i></span>
         <span id="toastMensagem" class="font-semibold">Projeto salvo com sucesso!</span>
     </div>
+
+    <!-- MOBILE FLOATING ACTION BUTTON (FAB: + RÁPIDO PARA ADICIONAR ELEMENTOS) -->
+    <div class="mobile-fab fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2 no-print">
+        <!-- Speed Dial Items (Ocultos por padrão, alternados ao clicar no FAB) -->
+        <div id="mobileSpeedDialItems" class="hidden flex-col items-end gap-2 mb-1">
+            <button onclick="abrirModalPontoNovo('TUG'); toggleSpeedDialMobile();" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-2 text-xs border border-emerald-400/40">
+                <span>+ Tomada TUG</span> <i class="fa-solid fa-plug text-xs"></i>
+            </button>
+            <button onclick="abrirModalPontoNovo('TUE'); toggleSpeedDialMobile();" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-2 text-xs border border-blue-400/40">
+                <span>+ Tomada TUE</span> <i class="fa-solid fa-bolt text-xs"></i>
+            </button>
+            <button onclick="abrirModalPontoNovo('ILUM'); toggleSpeedDialMobile();" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-2 text-xs border border-amber-300">
+                <span>+ Lâmpada</span> <i class="fa-solid fa-lightbulb text-xs"></i>
+            </button>
+            <button onclick="abrirModalPontoNovo('INTERRUPTOR'); toggleSpeedDialMobile();" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-2 text-xs border border-purple-400/40">
+                <span>+ Interruptor</span> <i class="fa-solid fa-toggle-on text-xs"></i>
+            </button>
+            <button onclick="abrirModalNovoComodo(); toggleSpeedDialMobile();" class="bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-1.5 px-3 rounded-xl shadow-lg flex items-center gap-2 text-xs border border-amber-500/40">
+                <span>+ Novo Cômodo</span> <i class="fa-solid fa-cube text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Botão Principal do FAB -->
+        <button id="btnPrincipalFabMobile" onclick="toggleSpeedDialMobile()" class="mobile-fab-btn w-13 h-13 p-3.5 bg-gradient-to-tr from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-full shadow-2xl flex items-center justify-center text-lg font-black transition active:scale-95 ring-4 ring-slate-950/80">
+            <i id="iconeFabPrincipal" class="fa-solid fa-plus text-xl transition transform"></i>
+        </button>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (BARRA NATIVA INFERIOR COM AS 6 ABAS) -->
+    <nav class="mobile-bottom-nav fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-xl border-t border-slate-800/90 shadow-2xl flex items-center justify-around px-1 py-1.5 text-slate-400 no-print safe-area-bottom">
+        <button data-tab="planta" onclick="trocarAba('planta')" class="tab-btn-mobile text-amber-400 border-t-2 border-amber-400 bg-slate-850 flex flex-col items-center justify-center w-full py-1 rounded-lg transition active:scale-95">
+            <i class="fa-solid fa-pen-ruler text-sm"></i>
+            <span class="text-[9px] font-bold mt-0.5">Planta</span>
+        </button>
+        <button data-tab="instalacoes" onclick="trocarAba('instalacoes')" class="tab-btn-mobile flex flex-col items-center justify-center w-full py-1 rounded-lg transition active:scale-95">
+            <i class="fa-solid fa-bolt-lightning text-sm"></i>
+            <span class="text-[9px] font-medium mt-0.5">Elétrica</span>
+        </button>
+        <button data-tab="visualizacao3d" onclick="trocarAba('visualizacao3d')" class="tab-btn-mobile flex flex-col items-center justify-center w-full py-1 rounded-lg transition active:scale-95">
+            <i class="fa-solid fa-cube text-sm"></i>
+            <span class="text-[9px] font-medium mt-0.5">3D BIM</span>
+        </button>
+        <button data-tab="alimentador" onclick="trocarAba('alimentador')" class="tab-btn-mobile flex flex-col items-center justify-center w-full py-1 rounded-lg transition active:scale-95">
+            <i class="fa-solid fa-microchip text-sm"></i>
+            <span class="text-[9px] font-medium mt-0.5">Quadro</span>
+        </button>
+        <button data-tab="materiais" onclick="trocarAba('materiais')" class="tab-btn-mobile flex flex-col items-center justify-center w-full py-1 rounded-lg transition active:scale-95">
+            <i class="fa-solid fa-boxes-stacked text-sm"></i>
+            <span class="text-[9px] font-medium mt-0.5">Materiais</span>
+        </button>
+        <button data-tab="duvidas" onclick="trocarAba('duvidas')" class="tab-btn-mobile flex flex-col items-center justify-center w-full py-1 rounded-lg transition active:scale-95">
+            <i class="fa-solid fa-circle-question text-sm"></i>
+            <span class="text-[9px] font-medium mt-0.5">NBR 5410</span>
+        </button>
+    </nav>
+
+    <!-- MODAL DE INSTRUÇÕES PWA IOS -->
+    <div id="modalInstrucoesIOS" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-700 w-full max-w-sm rounded-2xl p-5 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-2xl mx-auto shadow-inner">
+                <i class="fa-brands fa-apple"></i>
+            </div>
+            <h3 class="text-base font-bold text-white">Instalar no iPhone / iPad</h3>
+            <p class="text-xs text-slate-300 leading-relaxed text-left">
+                No navegador Safari do seu dispositivo Apple, siga estes 2 passos:
+            </p>
+            <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-left space-y-2.5 text-xs">
+                <div class="flex items-start gap-2.5 text-slate-200">
+                    <span class="w-5 h-5 rounded-full bg-slate-800 text-amber-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                    <span>Toque no botão <strong>Compartilhar</strong> (<i class="fa-solid fa-arrow-up-from-bracket text-sky-400 mx-1"></i>) localizado na barra inferior do Safari.</span>
+                </div>
+                <div class="flex items-start gap-2.5 text-slate-200">
+                    <span class="w-5 h-5 rounded-full bg-slate-800 text-amber-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                    <span>Role para cima e toque em <strong>"Adicionar à Tela de Início"</strong> (<i class="fa-regular fa-square-plus text-emerald-400 mx-1"></i>).</span>
+                </div>
+            </div>
+            <button onclick="document.getElementById('modalInstrucoesIOS').classList.add('hidden')" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition shadow">
+                OK, Entendi
+            </button>
+        </div>
+    </div>
+
+<script>
+    // =========================================================================
+    // PWA & SERVICE WORKER LIFECYCLE HANDLERS
+    // =========================================================================
+    let deferredPromptPWA = null;
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('[PWA] Service Worker ativo:', reg.scope))
+                .catch(err => console.log('[PWA] Erro ao registrar Service Worker:', err));
+        });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Previne o infobar automático para que possamos usar nosso botão estilizado
+        e.preventDefault();
+        deferredPromptPWA = e;
+        console.log('[PWA] Evento beforeinstallprompt capturado');
+        const btnM = document.getElementById('btnInstalarAppMobile');
+        const btnD = document.getElementById('btnInstalarAppDesktop');
+        if (btnM) btnM.classList.remove('hidden');
+        if (btnD) btnD.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('[PWA] Aplicativo instalado com sucesso!');
+        deferredPromptPWA = null;
+        const btnM = document.getElementById('btnInstalarAppMobile');
+        const btnD = document.getElementById('btnInstalarAppDesktop');
+        if (btnM) btnM.classList.add('hidden');
+        if (btnD) btnD.classList.add('hidden');
+    });
+
+    function dispararInstalacaoPWA() {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (deferredPromptPWA) {
+            deferredPromptPWA.prompt();
+            deferredPromptPWA.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('[PWA] Usuário aceitou a instalação');
+                } else {
+                    console.log('[PWA] Usuário recusou a instalação');
+                }
+                deferredPromptPWA = null;
+            });
+        } else if (isIOS) {
+            const m = document.getElementById('modalInstrucoesIOS');
+            if (m) m.classList.remove('hidden');
+        } else {
+            // Em navegadores de computador ou quando já instalado
+            const m = document.getElementById('modalInstrucoesIOS');
+            if (m) {
+                m.classList.remove('hidden');
+            } else {
+                alert('Para instalar o aplicativo no seu dispositivo: No menu do navegador (três pontos ⋮), selecione "Instalar PRO-ELÉTRICA" ou "Adicionar à tela inicial".');
+            }
+        }
+    }
+</script>
 </body>
 </html>
